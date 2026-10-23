@@ -1,107 +1,111 @@
 # AICTE PRAGATI-NAV (APH-Flow 360)
-### Unified Digital Platform for Approval Automation, CPU Scheduling & Compliance Monitoring
+### Unified Digital Platform for AICTE Approval Automation, Compliance & Document Validity Monitoring
 
-[![AICTE Approval Process Handbook 2024-27](https://img.shields.io/badge/AICTE-APH%202024--27-blue.svg)](https://www.aicte-india.org)
-[![SIH Hackathon](https://img.shields.io/badge/SIH-Problem%20Solution-orange.svg)](https://sih.gov.in)
-[![Architecture](https://img.shields.io/badge/Architecture-Frontend%20%7C%20Backend-brightgreen.svg)]()
-[![Algorithm](https://img.shields.io/badge/Scheduling-Classical%20CPU%20Algorithms-purple.svg)]()
-
-> **Regulatory Safeguard Notice:** AICTE PRAGATI-NAV operates in accordance with the AICTE Act, 1987 and Approval Process Handbook (APH) 2024–27. Automated recommendations, CPU dispatch sequences, and SLA deadline alerts assist statutory processing, while final verification, inspections, and regulatory decisions remain exclusively reserved for competent AICTE authorities.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![React 19](https://img.shields.io/badge/React-19.0-blue.svg)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6.0-purple.svg)](https://vitejs.dev/)
+[![AICTE APH](https://img.shields.io/badge/AICTE-APH%202024--27-orange.svg)](https://www.aicte-india.org/)
 
 ---
 
-## 📂 Repository Structure
+## 📌 Executive Overview
 
-```bash
-Automation-System/
-├── backend/                        # Express.js REST API & CPU Scheduling Service
-│   ├── cpuScheduler.js             # Classical CPU algorithms (FCFS, SJF, Priority, RR)
-│   ├── server.js                   # API endpoints & application store
-│   └── package.json                # Backend dependencies (express, cors)
-│
-├── frontend/                       # Modern React + Vite Client Application
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Header.jsx                  # National AICTE strip & 4-role switcher
-│   │   │   ├── SimulationBar.jsx           # Real-time time travel & SLA escalation tester
-│   │   │   ├── PendencyDashboard.jsx       # 8-Region matrix, stage funnel & KPI grid
-│   │   │   ├── WorkflowAutomation.jsx      # APH routing engine & deficiency revert modals
-│   │   │   ├── EvcHub.jsx                  # EVC panel scheduler & 48h report countdown
-│   │   │   ├── UndertakingsTracker.jsx     # Conditional approvals & evidence verify portal
-│   │   │   ├── LeaseValidityRadar.jsx      # 30-year land lease expiry & advance notices
-│   │   │   ├── EscalationMatrix.jsx        # Multi-tier escalation & formal letter generator
-│   │   │   ├── CpuSchedulerViewer.jsx      # Interactive CPU Scheduling & Gantt visualizer
-│   │   │   ├── AuditTrailViewer.jsx        # SHA-256 cryptographically hashed audit ledger
-│   │   │   ├── AphRuleConfigurator.jsx     # Policy SLA parameter tuner
-│   │   │   ├── ApplicationDetailsModal.jsx # Full case file inspector
-│   │   │   ├── CaseSummaryModal.jsx        # Official printable AICTE electronic dossier
-│   │   │   └── NotificationsModal.jsx      # Automated alerts drawer
-│   │   ├── data/mockData.js                # AICTE regional master data & state model
-│   │   ├── utils/cpuScheduler.js           # Client-side CPU scheduling engine
-│   │   ├── index.css                       # Hand-crafted Vanilla CSS design tokens
-│   │   └── App.jsx                         # Main application state orchestration
-│   ├── index.html                          # Official Google fonts & favicon
-│   └── package.json                        # Frontend dependencies
-│
-├── .gitignore                      # Git ignore rules for node_modules, build & env
-├── package.json                    # Root workspace runner scripts
-└── README.md                       # Comprehensive documentation
+**AICTE PRAGATI-NAV** is an integrated, secure, and configurable regulatory governance platform designed to automate and monitor technical education approval workflows under the **AICTE Approval Process Handbook (APH) 2024–27**.
+
+The platform resolves fragmented manual coordination across 8 AICTE Regional Offices by implementing automated stage transitions, 3-expert committee scheduling, strict time-bound undertaking tracking, 30-year registered land lease countdowns, and a 3-tier escalation ladder.
+
+---
+
+## 📄 Official Project Documentation
+
+The complete project report and regulatory compliance manual is available in the root repository:
+- **PDF Report**: [`AICTE_PRAGATI_NAV_Project_Documentation.pdf`](./AICTE_PRAGATI_NAV_Project_Documentation.pdf) *(Official 4-page ISO A4 PDF)*
+- **Interactive HTML Report**: [`report.html`](./report.html) *(Print-ready responsive report)*
+
+---
+
+## 🚀 Key Functional Modules
+
+| Module | Name | Key Capabilities |
+| :--- | :--- | :--- |
+| **Module A** | **Multi-Stage Approval Workflow Engine** | Automated state machine guiding applications through Scrutiny, EVC, SAC/SHC, and Council approval with deficiency revert mechanisms and official printable dossiers. |
+| **Module B** | **Regional Pendency & SLA Monitoring Grid** | Real-time statutory SLA countdowns across all 8 AICTE Regional Offices (WRO, NRO, SWRO, SCRO, CRO, NWRO, ERO, SRO) with automated bottleneck flags. |
+| **Module C** | **Automated EVC Scheduling Engine** | Multi-expert committee formulation (Senior Academician, Architect/Civil Expert, RO Representative) with autonomous conflict-of-interest checks and 48-hour report submission clocks. |
+| **Module D** | **Time-Bound Undertakings & Compliance Ledger** | Tracks conditional approvals (faculty recruitment, endowment deposits, fire safety NOCs) with proof uploads and regional officer approval gates. |
+| **Module E** | **30-Year Land Lease & Document Validity Radar** | 4-tier countdown (>180d, 90–180d, &le;90d, Expired) with automatic regulatory freeze preventing issuance of Extension of Approval (EoA) on lapsed deeds. |
+| **Module F** | **3-Tier Automated Escalation Ladder** | Automated escalation on aging cases: **Level 1** (SLA+2d: SMS/Email to Principal), **Level 2** (SLA+5d: Formal Directive to Regional Officer), and **Level 3** (SLA+8d: Apex Docket to Member Secretary). |
+
+---
+
+## 🛡️ Role-Based Access Control (RBAC) Architecture
+
+The platform implements strict permission boundaries across three distinct personas:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 RBAC PERMISSION MATRIX                                 │
+├───────────────────────┬──────────────────────────┬─────────────────────────────────────┤
+│ Role                  │ Scope                    │ Key Permissions                     │
+├───────────────────────┼──────────────────────────┼─────────────────────────────────────┤
+│ 1. Institution        │ Isolated to single       │ Track progress, upload evidence,    │
+│    (Applicant)        │ institute record         │ respond to deficiencies, view alerts│
+├───────────────────────┼──────────────────────────┼─────────────────────────────────────┤
+│ 2. Regional Officer   │ Scoped to jurisdiction   │ Advance/revert stages, schedule EVC,│
+│    (RO / Committee)   │ (e.g., WRO, SCRO)        │ verify undertakings, validate leases│
+├───────────────────────┼──────────────────────────┼─────────────────────────────────────┤
+│ 3. Bureau Head        │ Pan-India (All 8         │ National bottleneck heatmaps, SLA   │
+│    (Apex Admin - HQ)  │ Regional Offices)        │ policy editor, apex escalations     │
+└───────────────────────┴──────────────────────────┴─────────────────────────────────────┘
 ```
 
 ---
 
-## ⚡ CPU Scheduling Algorithm Integration
+## 🛠️ Tech Stack & Design System
 
-In high-volume AICTE approval cycles, Scrutiny Officers, EVC Expert Panels, and Regional Desks represent **processing cores / CPUs**, while incoming institutional applications represent **processes / jobs**.
-
-AICTE PRAGATI-NAV integrates classical Operating System CPU Scheduling algorithms to optimize review throughput and eliminate administrative bottlenecks:
-
-| CPU Scheduling Algorithm | Administrative Implementation in AICTE Workflows | Key Benefit |
-| :--- | :--- | :--- |
-| **Preemptive SLA Priority (EDF)** | Highest priority ($P1$) allocated to Level 3 Member Secretary escalations and critical lease breaches ($P2$). High-priority tasks **preempt** active officer queues. | Eliminates regulatory deadline defaults and stops SLA breaches before they escalate. |
-| **Round Robin (RR, $Q = 2$ Days)** | Allocates equal time-slices (2 review days) across applicant institutions and regional offices. | Ensures fairness and prevents large multi-course applications from starving smaller diploma institutes. |
-| **Shortest Job First (SJF / SRTF)** | Evaluates standard Extension of Approval (EoA) cases with shortest burst times ($2$ units) before complex multi-phase routes ($8$ units). | Minimizes Average Waiting Time (AWT) across technical institutions. |
-| **First-Come, First-Served (FCFS)** | Strictly sequences review based on application lodgement timestamp. | Baseline transparency for chronological accountability. |
+- **Frontend Core**: React 19, Vite, ES6+
+- **Styling**: Tailored CSS design system with glassmorphism, micro-animations, and AICTE National Identity palette (Saffron `#FF6B00`, Deep Navy `#0F172A`, Emerald `#10B981`)
+- **PDF Generation**: `pdf-lib` automated ISO A4 multi-page document generator with official headers, tables, callouts, and digital sign-off badges
+- **Role Permissions**: `src/lib/permissions.js`, `usePermissions()` hook, and `<RequireRole>` wrapper
 
 ---
 
-## 🚀 Quick Start Guide
+## 💻 Local Setup & Execution
 
 ### 1. Prerequisites
-- Node.js v18+ (tested on Node v24)
-- npm v9+
+- Node.js (v18.0.0 or higher)
+- npm (v9.0.0 or higher)
 
-### 2. Backend Setup
+### 2. Install & Start Application
 ```bash
-cd backend
-npm install
-npm start
-# Backend API runs on http://127.0.0.1:5000
-```
-
-### 3. Frontend Setup
-```bash
+# Navigate to the frontend directory
 cd frontend
+
+# Install dependencies
 npm install
+
+# Start the Vite development server
 npm run dev
-# Frontend application runs on http://127.0.0.1:5173
 ```
+Open `http://localhost:5173` in your browser.
+
+### 3. Generate Official PDF Report
+```bash
+# Run the standalone PDF generator script
+cd frontend
+node generate_pdf.js
+```
+The output file `AICTE_PRAGATI_NAV_Project_Documentation.pdf` will be created in the repository root.
 
 ---
 
-## 🎯 Evaluation Features
+## 🔗 National e-Governance Integrations (Architecture Ready)
 
-1. **Interactive Simulation Bar (Time Travel):**
-   - Click `+1 Day`, `+3 Days`, or `+7 Days` to watch SLA clocks advance, badges flash, and Level 1/2/3 hierarchical escalations trigger in real time.
-2. **CPU Scheduling Dashboard:**
-   - Navigate to the **CPU Dispatcher** tab to compare Gantt charts, Average Waiting Times, and dispatch optimal sequences to regional officers.
-3. **Role Switcher:**
-   - Toggle between **AICTE Apex Bureau**, **Regional Officer (WRO Mumbai)**, **Committee Chairman (IIT Bombay)**, and **Institution Principal**.
-4. **Electronic Case Summary Dossier:**
-   - Click *Electronic Case Summary* to preview and print the official AICTE dossier with QR authentication badges and digital signature hashes.
+1. **DigiLocker Integration**: Automated retrieval and verification of institutional registration and accreditation certificates.
+2. **State Land Records Bridge**: Integration with Bhoomi, MahaBhulekh, and BanglarBhumi to detect land encumbrances and verify 30-year lease deeds.
+3. **e-Sign & Aadhaar OTP**: Legal validity for affidavits, compliance undertakings, and EVC inspection reports under Section 3A of the IT Act.
+4. **National SMS & Email Gateway**: Timely automated escalation dispatches via CDAC infrastructure.
 
 ---
 
-## 📜 License & Compliance
-Compliant with AICTE Approval Process Handbook (APH) 2024–27 regulations.
-Developed for the Smart India Hackathon.
+## 👥 Authors & Hackathon Team
+Developed for the **Smart India Hackathon (SIH)** — Problem Statement: Automated AICTE Approval & Compliance Monitoring Platform.

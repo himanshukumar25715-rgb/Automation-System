@@ -12,6 +12,7 @@ import {
   Send,
   Calendar
 } from 'lucide-react';
+import { Permission, usePermissions, Role } from '../lib/permissions';
 
 export function LeaseValidityRadar({ 
   leaseDocs, 
@@ -19,6 +20,7 @@ export function LeaseValidityRadar({
   onVerifyRenewedDoc,
   currentRole 
 }) {
+  const { can, getRestrictionReason } = usePermissions(currentRole);
   const [searchTerm, setSearchTerm] = useState('');
   const [severityFilter, setSeverityFilter] = useState('ALL');
 
@@ -231,13 +233,24 @@ export function LeaseValidityRadar({
                       </span>
                     </td>
                     <td>
-                      <button
-                        className={`btn btn-sm ${isCritical ? 'btn-warning' : 'btn-secondary'}`}
-                        onClick={() => handleOpenRenewal(doc)}
-                        id={`btn-renew-doc-${doc.id}`}
-                      >
-                        <UploadCloud size={13} /> Upload Renewal
-                      </button>
+                      {can(Permission.UPLOAD_DOCUMENT_RENEWAL) ? (
+                        <button
+                          className={`btn btn-sm ${isCritical ? 'btn-warning' : 'btn-secondary'}`}
+                          onClick={() => handleOpenRenewal(doc)}
+                          id={`btn-renew-doc-${doc.id}`}
+                        >
+                          <UploadCloud size={13} /> Upload Renewal
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          disabled
+                          style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                          title={getRestrictionReason(Permission.UPLOAD_DOCUMENT_RENEWAL)}
+                        >
+                          <UploadCloud size={13} /> Upload Renewal
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

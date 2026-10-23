@@ -14,9 +14,12 @@ import {
   ShieldCheck,
   Calendar,
   Layers,
-  FileCheck
+  FileCheck,
+  MapPin,
+  UploadCloud
 } from 'lucide-react';
-import { WORKFLOW_ROUTES } from '../data/mockData';
+import { WORKFLOW_ROUTES, AICTE_REGIONS } from '../data/mockData';
+import { Role, Permission, usePermissions } from '../lib/permissions';
 
 export function WorkflowAutomation({ 
   applications, 
@@ -24,17 +27,30 @@ export function WorkflowAutomation({
   onProgressStage,
   onRevertWithDeficiency,
   onOpenCaseSummary,
+  onReassignRegion,
+  onRespondToDeficiency,
   currentRole
 }) {
+  const { can, getRestrictionReason, isRole } = usePermissions(currentRole);
+
   const [selectedRouteFilter, setSelectedRouteFilter] = useState('ALL');
   const [selectedRegionFilter, setSelectedRegionFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Deficiencies modal state
+  // Deficiency Revert Modal (RO)
   const [deficiencyModalApp, setDeficiencyModalApp] = useState(null);
   const [deficiencyClause, setDeficiencyClause] = useState('APH Clause 6.4 (Library / Labs)');
   const [deficiencyDescription, setDeficiencyDescription] = useState('');
   const [cureDays, setCureDays] = useState(7);
+
+  // Deficiency Response Modal (Institution)
+  const [respondModalApp, setRespondModalApp] = useState(null);
+  const [responseText, setResponseText] = useState('');
+  const [responseFile, setResponseFile] = useState('');
+
+  // Reassign Region Modal (Bureau Head)
+  const [reassignModalApp, setReassignModalApp] = useState(null);
+  const [targetRegion, setTargetRegion] = useState('SRO');
 
   const filteredApps = applications.filter(app => {
     const matchesRoute = selectedRouteFilter === 'ALL' || app.route === selectedRouteFilter;
@@ -61,9 +77,37 @@ export function WorkflowAutomation({
     setDeficiencyModalApp(null);
   };
 
+  const handleOpenRespondDeficiency = (app) => {
+    setRespondModalApp(app);
+    setResponseText('We have rectified the recorded discrepancy and attached certified documentation.');
+    setResponseFile(`Compliance_Rectification_${app.id}.pdf`);
+  };
+
+  const handleSubmitResponse = (e) => {
+    e.preventDefault();
+    if (!respondModalApp) return;
+    if (onRespondToDeficiency) {
+      onRespondToDeficiency(respondModalApp.id, responseText, responseFile);
+    }
+    setRespondModalApp(null);
+  };
+
+  const handleConfirmReassign = (e) => {
+    e.preventDefault();
+    if (!reassignModalApp) return;
+    if (onReassignRegion) {
+      onReassignRegion(reassignModalApp.id, targetRegion);
+    }
+    setReassignModalApp(null);
+  };
+
+  const canAdvance = can(Permission.ADVANCE_APPLICATION_STAGE);
+  const canRevert = can(Permission.REVERT_WITH_DEFICIENCY);
+  const canReassign = can(Permission.REASSIGN_APPLICATION_REGION);
+
   return (
     <div className="workflow-automation">
-      {/* Top Banner explaining APH Routing Engine */}
+      {/* Top Banner */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
         border: '1px solid var(--border-medium)',
@@ -86,10 +130,14 @@ export function WorkflowAutomation({
             </span>
           </div>
           <h2 style={{ fontSize: '1.35rem', marginTop: '6px' }}>
-            End-to-End Approval Stage Automation & Routing Engine
+            {isRole(Role.INSTITUTION) ? 'My Institutional Application Workflow' :
+             isRole(Role.REGIONAL_OFFICER) ? `${currentRole?.region} Regional Applications Workflow Engine` :
+             'National End-to-End Approval Workflows (All Regions)'}
           </h2>
           <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
-            Automated routing across standard Scrutiny, Expert Visit Committees (EVC), and Standing Appellate Committee (SAC) with authorized returns and state transitions.
+            {isRole(Role.INSTITUTION) 
+              ? 'Real-time stage tracking, deficiency response portal, and electronic case summary.'
+              : 'Automated stage advancement, statutory deficiency revert notices, and APH compliance checks.'}
           </p>
         </div>
 
@@ -114,7 +162,7 @@ export function WorkflowAutomation({
         </div>
       </div>
 
-      {/* Filter Toolbar */}
+      {/* Filter Toolbar (Only show Region selector if user is Bureau Head) */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -136,26 +184,23 @@ export function WorkflowAutomation({
             />
           </div>
 
-          <select
-            value={selectedRegionFilter}
-            onChange={(e) => setSelectedRegionFilter(e.target.value)}
-            className="form-select"
-            style={{ width: '160px' }}
-          >
-            <option value="ALL">All Regions</option>
-            <option value="WRO">WRO (Mumbai)</option>
-            <option value="NRO">NRO (Kanpur)</option>
-            <option value="SRO">SRO (Chennai)</option>
-            <option value="NWRO">NWRO (Chandigarh)</option>
-            <option value="CRO">CRO (Bhopal)</option>
-            <option value="ERO">ERO (Kolkata)</option>
-            <option value="SCRO">SCRO (Hyderabad)</option>
-            <option value="SWRO">SWRO (Bengaluru)</option>
-          </select>
+          {can(Permission.VIEW_ALL_APPLICATIONS) && (
+            <select
+              value={selectedRegionFilter}
+              onChange={(e) => setSelectedRegionFilter(e.target.value)}
+              className="form-select"
+              style={{ width: '160px' }}
+            >
+              <option value="ALL">All 8 Regions</option>
+              {AICTE_REGIONS.map(reg => (
+                <option key={reg.code} value={reg.code}>{reg.code} ({reg.hq})</option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
-          Showing <strong>{filteredApps.length}</strong> active applications
+          Showing <strong>{filteredApps.length}</strong> {isRole(Role.INSTITUTION) ? 'institutional' : 'regional'} applications
         </div>
       </div>
 
@@ -257,8 +302,19 @@ export function WorkflowAutomation({
                   marginBottom: '16px',
                   fontSize: '0.78rem'
                 }}>
-                  <div style={{ fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <AlertTriangle size={14} /> Active Discrepancy / Deficiency Memo Recorded
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <AlertTriangle size={14} /> Active Discrepancy / Deficiency Memo Recorded
+                    </div>
+                    {isRole(Role.INSTITUTION) && !app.deficiencies[0].resolved && (
+                      <button 
+                        className="btn btn-warning btn-sm"
+                        onClick={() => handleOpenRespondDeficiency(app)}
+                        id={`btn-respond-def-${app.id}`}
+                      >
+                        <Send size={13} /> Submit Rectification Response
+                      </button>
+                    )}
                   </div>
                   <div style={{ color: '#cbd5e1', marginTop: '4px' }}>
                     <strong>{app.deficiencies[0].clause}:</strong> {app.deficiencies[0].description}
@@ -292,30 +348,69 @@ export function WorkflowAutomation({
                   >
                     <FileCheck size={14} /> Electronic Case Summary
                   </button>
+
+                  {/* Reassign Region (Bureau Head only) */}
+                  {canReassign && (
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setReassignModalApp(app);
+                        setTargetRegion(app.region === 'WRO' ? 'SRO' : 'WRO');
+                      }}
+                      title="Reassign application to another AICTE Regional Office to balance workload"
+                      id={`btn-reassign-${app.id}`}
+                    >
+                      <MapPin size={13} /> Reassign Region
+                    </button>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   {/* Revert / Return button */}
                   {app.stageIndex < stages.length - 1 && (
-                    <button 
-                      className="btn btn-warning btn-sm"
-                      onClick={() => handleOpenDeficiency(app)}
-                      title="Issue Deficiency Memo and return to institution for clarifications"
-                    >
-                      <RotateCcw size={14} /> Revert for Deficiencies
-                    </button>
+                    canRevert ? (
+                      <button 
+                        className="btn btn-warning btn-sm"
+                        onClick={() => handleOpenDeficiency(app)}
+                        title="Issue Deficiency Memo and return to institution for clarifications"
+                        id={`btn-revert-${app.id}`}
+                      >
+                        <RotateCcw size={14} /> Revert for Deficiencies
+                      </button>
+                    ) : (
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        disabled
+                        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                        title={getRestrictionReason(Permission.REVERT_WITH_DEFICIENCY)}
+                      >
+                        <RotateCcw size={14} /> Revert for Deficiencies
+                      </button>
+                    )
                   )}
 
                   {/* Advance to next stage button */}
                   {app.stageIndex < stages.length - 1 ? (
-                    <button 
-                      className="btn btn-primary btn-sm"
-                      onClick={() => onProgressStage(app.id)}
-                      id={`btn-progress-${app.id}`}
-                    >
-                      <span>Approve & Progress to {stages[app.stageIndex + 1]}</span>
-                      <ArrowRight size={14} />
-                    </button>
+                    canAdvance ? (
+                      <button 
+                        className="btn btn-primary btn-sm"
+                        onClick={() => onProgressStage(app.id)}
+                        id={`btn-progress-${app.id}`}
+                      >
+                        <span>Approve & Progress to {stages[app.stageIndex + 1]}</span>
+                        <ArrowRight size={14} />
+                      </button>
+                    ) : (
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        disabled
+                        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                        title={getRestrictionReason(Permission.ADVANCE_APPLICATION_STAGE)}
+                      >
+                        <span>Approve & Progress to {stages[app.stageIndex + 1]}</span>
+                        <ArrowRight size={14} />
+                      </button>
+                    )
                   ) : (
                     <span className="badge badge-success" style={{ padding: '6px 14px' }}>
                       <CheckCircle size={14} /> Final Order Issued
@@ -328,7 +423,7 @@ export function WorkflowAutomation({
         })}
       </div>
 
-      {/* Deficiency Revert Modal */}
+      {/* Deficiency Revert Modal (RO) */}
       {deficiencyModalApp && (
         <div className="modal-overlay">
           <div className="modal-card">
@@ -373,7 +468,7 @@ export function WorkflowAutomation({
               </div>
 
               <div className="form-group">
-                <label className="form-label">Detailed Deficiency Description & Rectification Requirements:</label>
+                <label className="form-label">Detailed Deficiency Description & Mandatory Rectification Requirement:</label>
                 <textarea 
                   className="form-textarea"
                   value={deficiencyDescription}
@@ -397,18 +492,6 @@ export function WorkflowAutomation({
                 </select>
               </div>
 
-              <div style={{
-                background: 'rgba(245, 158, 11, 0.1)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                padding: '10px 14px',
-                borderRadius: '6px',
-                fontSize: '0.74rem',
-                color: '#cbd5e1',
-                marginBottom: '20px'
-              }}>
-                Issuing this deficiency memo will automatically log a cryptographic entry in the digital audit trail, dispatch an automated communication to the applicant institution, and initiate a countdown clock.
-              </div>
-
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
@@ -422,6 +505,142 @@ export function WorkflowAutomation({
                   className="btn btn-warning"
                 >
                   <Send size={15} /> Issue Deficiency Memo & Revert
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Institution Respond to Deficiency Modal */}
+      {respondModalApp && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <div className="panel-header">
+              <h3 className="panel-title">
+                <UploadCloud size={20} color="#38bdf8" /> Submit Institutional Rectification Response
+              </h3>
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={() => setRespondModalApp(null)}
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitResponse}>
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.7)',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '0.8rem'
+              }}>
+                <div><strong>Application:</strong> {respondModalApp.id}</div>
+                <div><strong>Recorded Discrepancy:</strong> {respondModalApp.deficiencies?.[0]?.description}</div>
+                <div><strong>Norm Reference:</strong> {respondModalApp.deficiencies?.[0]?.clause}</div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Institutional Clarification & Compliance Statement:</label>
+                <textarea 
+                  className="form-textarea"
+                  value={responseText}
+                  onChange={(e) => setResponseText(e.target.value)}
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Attached Rectification Evidence File (PDF):</label>
+                <input 
+                  type="text"
+                  className="form-input"
+                  value={responseFile}
+                  onChange={(e) => setResponseFile(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => setRespondModalApp(null)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                >
+                  <Send size={15} /> Submit for Regional Officer Re-Scrutiny
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reassign Region Modal (Bureau Head) */}
+      {reassignModalApp && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <div className="panel-header">
+              <h3 className="panel-title">
+                <MapPin size={20} color="#c084fc" /> Reassign Application Jurisdiction
+              </h3>
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={() => setReassignModalApp(null)}
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmReassign}>
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.7)',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '0.8rem'
+              }}>
+                <div><strong>Application:</strong> {reassignModalApp.id}</div>
+                <div><strong>Institution:</strong> {reassignModalApp.instituteName}</div>
+                <div><strong>Current Region:</strong> {reassignModalApp.region}</div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Transfer / Reassign to Target AICTE Regional Office:</label>
+                <select 
+                  className="form-select"
+                  value={targetRegion}
+                  onChange={(e) => setTargetRegion(e.target.value)}
+                >
+                  {AICTE_REGIONS.map(reg => (
+                    <option key={reg.code} value={reg.code}>
+                      {reg.code} - {reg.name} ({reg.hq})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => setReassignModalApp(null)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
+                >
+                  Confirm Reassignment
                 </button>
               </div>
             </form>

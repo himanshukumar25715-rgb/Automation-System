@@ -5,13 +5,16 @@ import {
   INITIAL_LEASE_DOCUMENTS, 
   INITIAL_NOTIFICATIONS, 
   INITIAL_APH_RULES, 
-  USER_ROLES,
   WORKFLOW_ROUTES 
 } from './data/mockData';
 
+import { Role, DEMO_PROFILES, usePermissions, RequireRole } from './lib/permissions';
 import { Header } from './components/Header';
+import { Sidebar } from './components/Sidebar';
+import { RoleLoginModal } from './components/RoleLoginModal';
 import { SimulationBar } from './components/SimulationBar';
 import { PendencyDashboard } from './components/PendencyDashboard';
+import { InstitutionDashboard } from './components/InstitutionDashboard';
 import { WorkflowAutomation } from './components/WorkflowAutomation';
 import { EvcHub } from './components/EvcHub';
 import { UndertakingsTracker } from './components/UndertakingsTracker';
@@ -19,7 +22,8 @@ import { LeaseValidityRadar } from './components/LeaseValidityRadar';
 import { EscalationMatrix } from './components/EscalationMatrix';
 import { AuditTrailViewer } from './components/AuditTrailViewer';
 import { AphRuleConfigurator } from './components/AphRuleConfigurator';
-import { CpuSchedulerViewer } from './components/CpuSchedulerViewer';
+import { RegionReportsView } from './components/RegionReportsView';
+import { IntegrationsView } from './components/IntegrationsView';
 import { ApplicationDetailsModal } from './components/ApplicationDetailsModal';
 import { CaseSummaryModal } from './components/CaseSummaryModal';
 import { NotificationsModal } from './components/NotificationsModal';
@@ -32,7 +36,10 @@ export default function App() {
   const [leaseDocs, setLeaseDocs] = useState(INITIAL_LEASE_DOCUMENTS);
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [aphRules, setAphRules] = useState(INITIAL_APH_RULES);
-  const [currentRole, setCurrentRole] = useState(USER_ROLES[0]);
+  
+  // RBAC State: 3 Roles (Default to Regional Officer for rich demo, or Bureau Head)
+  const [currentUser, setCurrentUser] = useState(DEMO_PROFILES[Role.REGIONAL_OFFICER]);
+  const [isRoleSelectorOpen, setIsRoleSelectorOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [simDaysOffset, setSimDaysOffset] = useState(0);
 
@@ -42,9 +49,26 @@ export default function App() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [lastActionMessage, setLastActionMessage] = useState('');
 
+  // Hook for strict RBAC and data scoping
+  const { 
+    can, 
+    isRole, 
+    scopeApplications, 
+    scopeUndertakings, 
+    scopeDocuments, 
+    scopeNotifications, 
+    scopeAuditTrail 
+  } = usePermissions(currentUser);
+
+  // Scoped Data Collections
+  const visibleApplications = scopeApplications(applications);
+  const visibleUndertakings = scopeUndertakings(undertakings);
+  const visibleLeaseDocs = scopeDocuments(leaseDocs);
+  const visibleNotifications = scopeNotifications(notifications);
+
   const triggerToast = (msg) => {
     setLastActionMessage(msg);
-    setTimeout(() => setLastActionMessage(''), 4000);
+    setTimeout(() => setLastActionMessage(''), 4500);
   };
 
   // Helper for hash generation
@@ -56,6 +80,14 @@ export default function App() {
     const d = new Date(2026, 9, 23);
     d.setDate(d.getDate() + offset);
     return d.toISOString().slice(0, 10);
+  };
+
+  // Role Switching Handler
+  const handleSelectRole = (newProfile) => {
+    setCurrentUser(newProfile);
+    setIsRoleSelectorOpen(false);
+    setActiveTab('dashboard');
+    triggerToast(`Logged in as ${newProfile.badge} (${newProfile.region || newProfile.institutionId})`);
   };
 
   // ==========================================
@@ -70,7 +102,6 @@ export default function App() {
 
     // 1. Advance applications stage aging
     const updatedApps = applications.map(app => {
-      // Don't age if completed
       if (app.currentStage === 'Council Approval' || app.status === 'Approved') {
         return app;
       }
@@ -90,8 +121,8 @@ export default function App() {
             newlyTriggeredNotifs.push({
               id: `NOTIF-AUTO-${Date.now()}-${app.id}-L3`,
               timestamp: `${simDateStr} 00:01`,
-              title: `Level 3 Apex Escalation: SLA breached by ${daysPastSla} days`,
-              message: `Application ${app.id} (${app.instituteName}) has severely breached stage SLA. Emergency docket dispatched to Member Secretary.`,
+              title: `Level 3 Bureau Head Escalation: SLA breached by ${daysPastSla} days`,
+              message: `Application ${app.id} (${app.instituteName}) has breached SLA. Apex docket dispatched to Bureau Head / Member Secretary.`,
               severity: 'critical',
               region: app.region,
               applicationId: app.id,
@@ -105,8 +136,8 @@ export default function App() {
             newlyTriggeredNotifs.push({
               id: `NOTIF-AUTO-${Date.now()}-${app.id}-L2`,
               timestamp: `${simDateStr} 00:01`,
-              title: `Level 2 Bureau Escalation: SLA breached by ${daysPastSla} days`,
-              message: `Application ${app.id} (${app.instituteName}) delay escalated to Adviser (Approval Bureau), AICTE HQ.`,
+              title: `Level 2 Regional Officer Escalation: SLA breached by ${daysPastSla} days`,
+              message: `Application ${app.id} (${app.instituteName}) delay escalated to Regional Officer (${app.region}).`,
               severity: 'critical',
               region: app.region,
               applicationId: app.id,
@@ -120,8 +151,8 @@ export default function App() {
             newlyTriggeredNotifs.push({
               id: `NOTIF-AUTO-${Date.now()}-${app.id}-L1`,
               timestamp: `${simDateStr} 00:01`,
-              title: `Level 1 Regional Escalation: SLA breached by ${daysPastSla} days`,
-              message: `Application ${app.id} is overdue at ${app.currentStage}. Alert dispatched to Regional Officer (${app.region}).`,
+              title: `Level 1 Institution Reminder: Stage pending for ${newDaysInStage} days`,
+              message: `Reminder dispatched to ${app.instituteName} and Scrutiny Officer for application ${app.id}.`,
               severity: 'warning',
               region: app.region,
               applicationId: app.id,
@@ -131,7 +162,6 @@ export default function App() {
         }
       }
 
-      // Add audit entry if escalation occurred
       let newAuditTrail = [...(app.auditTrail || [])];
       if (newEscalationLevel > app.escalationLevel) {
         newAuditTrail.unshift({
@@ -165,7 +195,7 @@ export default function App() {
           id: `NOTIF-UND-${Date.now()}-${u.id}`,
           timestamp: `${simDateStr} 00:01`,
           title: `Time-Bound Undertaking Overdue: ${u.id}`,
-          message: `${u.institute} has defaulted on condition "${u.condition}". Escalated to SAC for punitive action.`,
+          message: `${u.institute} has defaulted on condition "${u.condition}". Escalated to Regional Officer & SAC.`,
           severity: 'critical',
           region: u.region,
           applicationId: u.appId,
@@ -221,7 +251,7 @@ export default function App() {
 
     if (newlyTriggeredNotifs.length > 0) {
       setNotifications(prev => [...newlyTriggeredNotifs, ...prev]);
-      triggerToast(`Advanced +${daysToAdd} days: ${newlyTriggeredNotifs.length} new automated escalations triggered!`);
+      triggerToast(`Advanced +${daysToAdd} days: ${newlyTriggeredNotifs.length} new automated escalations dispatched!`);
     } else {
       triggerToast(`Advanced system clock by +${daysToAdd} days.`);
     }
@@ -244,7 +274,7 @@ export default function App() {
       id: `NOTIF-TEST-${Date.now()}`,
       timestamp: `${simDateStr} 12:00`,
       title: `Simulated Immediate Escalation Test on ${targetApp.id}`,
-      message: `Automated test trigger: Scrutiny delay breached statutory limit. Escalation alerts generated for Regional Officer and Bureau Head.`,
+      message: `Automated test trigger: SLA breach escalated along chain (Institution → Regional Officer → Bureau Head).`,
       severity: 'critical',
       region: targetApp.region,
       applicationId: targetApp.id,
@@ -262,7 +292,7 @@ export default function App() {
             {
               date: `${simDateStr} 12:00`,
               actor: 'Automated Escalation Simulator',
-              action: 'Manual Test: Level 3 Apex Escalation Fired to Member Secretary',
+              action: 'Manual Test: Level 3 Apex Escalation Dispatched to Bureau Head',
               hash: generateAuditHash()
             },
             ...(a.auditTrail || [])
@@ -292,7 +322,6 @@ export default function App() {
 
       const nextStageName = routeInfo.stages[nextIndex];
 
-      // Determine next SLA
       let nextSla = 7;
       if (nextStageName.includes('EVC Scheduling')) nextSla = aphRules.evcSchedulingSlaDays;
       else if (nextStageName.includes('EVC Inspection')) nextSla = 2; // 48 hours for report
@@ -301,12 +330,11 @@ export default function App() {
 
       const auditEntry = {
         date: `${simDateStr} 14:00`,
-        actor: `${currentRole.officer} (${currentRole.badge})`,
+        actor: `${currentUser.officer} (${currentUser.badge})`,
         action: `Stage Approved: Moved from "${app.currentStage}" to "${nextStageName}"`,
         hash: generateAuditHash()
       };
 
-      // Check if entering EVC queue
       let evcUpdate = { ...app.evcDetails };
       if (nextStageName.includes('EVC Scheduling') || nextStageName.includes('EVC Inspection')) {
         evcUpdate.required = true;
@@ -346,7 +374,7 @@ export default function App() {
 
       const auditEntry = {
         date: `${simDateStr} 15:30`,
-        actor: `${currentRole.officer} (${currentRole.badge})`,
+        actor: `${currentUser.officer} (${currentUser.badge})`,
         action: `Deficiency Memo Issued: Returned for rectification under ${deficiencyData.clause}`,
         hash: generateAuditHash()
       };
@@ -365,19 +393,90 @@ export default function App() {
         id: `NOTIF-DEF-${Date.now()}`,
         timestamp: `${simDateStr} 15:30`,
         title: `Deficiency Memo Dispatched: ${appId}`,
-        message: `Discrepancy notice issued to applicant for "${deficiencyData.clause}". 7-day cure window active.`,
+        message: `Discrepancy notice issued to applicant for "${deficiencyData.clause}". Rectification window active.`,
         severity: 'warning',
-        region: currentRole.region,
+        region: currentUser.region || 'WRO',
         applicationId: appId,
         read: false
       },
       ...prev
     ]);
 
-    triggerToast(`Deficiency Memo issued for ${appId}. Case reverted to institution.`);
+    triggerToast(`Deficiency Memo issued for ${appId}. Case returned to institution.`);
   };
 
-  // EVC Scheduling
+  // Institution submits response to deficiency
+  const handleRespondToDeficiency = (appId, responseText, responseFile) => {
+    const simDateStr = getSimulatedDateString(simDaysOffset);
+
+    setApplications(prev => prev.map(app => {
+      if (app.id !== appId) return app;
+
+      const updatedDefs = (app.deficiencies || []).map((d, i) => i === 0 ? {
+        ...d,
+        resolved: true,
+        instituteResponse: responseText,
+        responseFile
+      } : d);
+
+      const auditEntry = {
+        date: `${simDateStr} 16:45`,
+        actor: `${currentUser.officer} (${currentUser.badge})`,
+        action: `Deficiency Response Submitted: ${responseText.slice(0, 40)}... (File: ${responseFile})`,
+        hash: generateAuditHash()
+      };
+
+      return {
+        ...app,
+        status: 'Re-Scrutiny In Progress',
+        deficiencies: updatedDefs,
+        auditTrail: [auditEntry, ...(app.auditTrail || [])]
+      };
+    }));
+
+    setNotifications(prev => [
+      {
+        id: `NOTIF-RESP-${Date.now()}`,
+        timestamp: `${simDateStr} 16:45`,
+        title: `Institutional Rectification Response Received: ${appId}`,
+        message: `Applicant uploaded ${responseFile}. Ready for Regional Officer re-scrutiny verification.`,
+        severity: 'info',
+        region: currentUser.region || 'WRO',
+        applicationId: appId,
+        read: false
+      },
+      ...prev
+    ]);
+
+    triggerToast(`Deficiency response submitted for ${appId}. Ready for RO re-scrutiny.`);
+  };
+
+  // Reassign Region (Bureau Head Action)
+  const handleReassignRegion = (appId, newRegion) => {
+    const simDateStr = getSimulatedDateString(simDaysOffset);
+
+    setApplications(prev => prev.map(app => {
+      if (app.id !== appId) return app;
+      const oldRegion = app.region;
+
+      const auditEntry = {
+        date: `${simDateStr} 11:30`,
+        actor: `${currentUser.officer} (Bureau Head)`,
+        action: `Application Reassigned across Regional Offices: ${oldRegion} &rarr; ${newRegion}`,
+        hash: generateAuditHash()
+      };
+
+      return {
+        ...app,
+        region: newRegion,
+        auditTrail: [auditEntry, ...(app.auditTrail || [])]
+      };
+    }));
+
+    triggerToast(`Application ${appId} reassigned to ${newRegion} Regional Office.`);
+  };
+
+  // EVC Scheduling (RO Action)
   const handleScheduleEvc = (appId, scheduleData) => {
     const simDateStr = getSimulatedDateString(simDaysOffset);
 
@@ -403,7 +502,7 @@ export default function App() {
         auditTrail: [
           {
             date: `${simDateStr} 11:00`,
-            actor: `${currentRole.officer} (${currentRole.badge})`,
+            actor: `${currentUser.officer} (${currentUser.badge})`,
             action: `EVC Panel Constituted for visit on ${scheduleData.visitDate} (${scheduleData.committee.length} Experts)`,
             hash: generateAuditHash()
           },
@@ -441,7 +540,7 @@ export default function App() {
         auditTrail: [
           {
             date: `${simDateStr} 17:00`,
-            actor: 'EVC Committee Panel',
+            actor: `${currentUser.officer} (EVC Lead)`,
             action: `Digital EVC Report Submitted & Signed: ${reportData.outcome} (Infra: ${reportData.infraScore}%, Faculty: ${reportData.facultyScore}%)`,
             hash: generateAuditHash()
           },
@@ -472,9 +571,9 @@ export default function App() {
         id: `NOTIF-EVID-${Date.now()}`,
         timestamp: `${simDateStr} 14:00`,
         title: `Compliance Proof Submitted: ${undertakingId}`,
-        message: `Institution uploaded ${filename}. Ready for Regional Officer verification.`,
+        message: `${currentUser.instituteName || 'Institution'} uploaded ${filename}. Ready for Regional Officer verification.`,
         severity: 'info',
-        region: 'ALL',
+        region: currentUser.region || 'WRO',
         read: false
       },
       ...prev
@@ -493,7 +592,7 @@ export default function App() {
       };
     }));
 
-    triggerToast(approved ? `Undertaking ${undertakingId} approved & closed!` : `Undertaking ${undertakingId} rejected & escalated to SAC.`);
+    triggerToast(approved ? `Undertaking ${undertakingId} approved & closed by RO!` : `Undertaking ${undertakingId} rejected & escalated to SAC.`);
   };
 
   const handleAddNewUndertaking = (newU) => {
@@ -530,7 +629,7 @@ export default function App() {
       };
     }));
 
-    triggerToast(`Registered lease/statutory document renewed & validated!`);
+    triggerToast(`Registered lease deed / fire NOC renewed and recorded!`);
   };
 
   // Notifications
@@ -547,21 +646,27 @@ export default function App() {
     if (found) setInspectingApp(found);
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-  const overdueCount = applications.filter(a => a.daysInCurrentStage > a.slaDays).length;
+  // Counts for Sidebar Badges
+  const counts = {
+    applications: visibleApplications.length,
+    undertakings: visibleUndertakings.length,
+    criticalDocs: visibleLeaseDocs.filter(d => d.daysRemaining <= 90).length,
+    alerts: visibleNotifications.filter(n => !n.read).length,
+    evcQueue: visibleApplications.filter(a => a.evcDetails?.required && !a.evcDetails?.scheduled).length,
+    undertakingsPendingVerify: visibleUndertakings.filter(u => u.status === 'Submitted').length,
+    escalations: applications.filter(a => a.escalationLevel >= 2).length,
+  };
 
   return (
     <div className="app-container">
-      {/* 1. Header with Government AICTE Branding & Multi-Role Selector */}
+      {/* 1. Header with Government AICTE Branding & Active Role Badge */}
       <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        currentRole={currentRole}
-        setCurrentRole={setCurrentRole}
+        currentRole={currentUser}
+        onOpenSwitchRole={() => setIsRoleSelectorOpen(true)}
         simDaysOffset={simDaysOffset}
-        unreadCount={unreadCount}
+        unreadCount={counts.alerts}
         onOpenNotifications={() => setIsNotificationsOpen(true)}
-        overdueCount={overdueCount}
+        overdueCount={applications.filter(a => a.daysInCurrentStage > a.slaDays).length}
       />
 
       {/* 2. Interactive Time-Travel & Escalation Simulation Bar */}
@@ -573,93 +678,162 @@ export default function App() {
         lastActionMessage={lastActionMessage}
       />
 
-      {/* 3. Main Workspace depending on active navigation tab */}
-      <main className="main-content">
-        {activeTab === 'dashboard' && (
-          <PendencyDashboard
-            applications={applications}
-            undertakings={undertakings}
-            leaseDocs={leaseDocs}
-            onSelectApplication={(app) => setInspectingApp(app)}
-            onNavigateTab={(tab) => setActiveTab(tab)}
-            currentRole={currentRole}
-          />
-        )}
+      {/* Main Two-Column Layout: Left Sidebar + Role-Specific Content Area */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 120px)' }}>
+        
+        {/* Left Role-Specific Sidebar */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          currentRole={currentUser}
+          onOpenSwitchRole={() => setIsRoleSelectorOpen(true)}
+          counts={counts}
+        />
 
-        {activeTab === 'workflows' && (
-          <WorkflowAutomation
-            applications={applications}
-            onSelectApplication={(app) => setInspectingApp(app)}
-            onProgressStage={handleProgressStage}
-            onRevertWithDeficiency={handleRevertWithDeficiency}
-            onOpenCaseSummary={(app) => setSummaryApp(app)}
-            currentRole={currentRole}
-          />
-        )}
+        {/* Dynamic Main Workspace depending on Role and Active Tab */}
+        <main className="main-content" style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
+          
+          {/* Dashboard Tab */}
+          {activeTab === 'dashboard' && (
+            isRole(Role.INSTITUTION) ? (
+              <InstitutionDashboard
+                applications={visibleApplications}
+                undertakings={visibleUndertakings}
+                leaseDocs={visibleLeaseDocs}
+                notifications={visibleNotifications}
+                onNavigateTab={(tab) => setActiveTab(tab)}
+                onOpenCaseSummary={(app) => setSummaryApp(app)}
+                onOpenUploadUndertaking={() => setActiveTab('undertakings')}
+                onOpenUploadLease={() => setActiveTab('documents')}
+                currentUser={currentUser}
+              />
+            ) : (
+              <PendencyDashboard
+                applications={visibleApplications}
+                undertakings={visibleUndertakings}
+                leaseDocs={visibleLeaseDocs}
+                onSelectApplication={(app) => setInspectingApp(app)}
+                onNavigateTab={(tab) => setActiveTab(tab)}
+                currentRole={currentUser}
+              />
+            )
+          )}
 
-        {activeTab === 'evc' && (
-          <EvcHub
-            applications={applications}
-            onScheduleEvc={handleScheduleEvc}
-            onSubmitEvcReport={handleSubmitEvcReport}
-            onOpenApplicationDossier={(app) => setInspectingApp(app)}
-            currentRole={currentRole}
-          />
-        )}
+          {/* Applications Tab */}
+          {activeTab === 'applications' && (
+            <WorkflowAutomation
+              applications={visibleApplications}
+              onSelectApplication={(app) => setInspectingApp(app)}
+              onProgressStage={handleProgressStage}
+              onRevertWithDeficiency={handleRevertWithDeficiency}
+              onOpenCaseSummary={(app) => setSummaryApp(app)}
+              onReassignRegion={handleReassignRegion}
+              onRespondToDeficiency={handleRespondToDeficiency}
+              currentRole={currentUser}
+            />
+          )}
 
-        {activeTab === 'undertakings' && (
-          <UndertakingsTracker
-            undertakings={undertakings}
-            onUploadComplianceEvidence={handleUploadComplianceEvidence}
-            onVerifyUndertaking={handleVerifyUndertaking}
-            onAddNewUndertaking={handleAddNewUndertaking}
-            currentRole={currentRole}
-          />
-        )}
+          {/* EVC Hub Tab (Regional Officer only) */}
+          {activeTab === 'evc' && (
+            <RequireRole currentRole={currentUser.role} allowedRoles={[Role.REGIONAL_OFFICER]}>
+              <EvcHub
+                applications={visibleApplications}
+                onScheduleEvc={handleScheduleEvc}
+                onSubmitEvcReport={handleSubmitEvcReport}
+                onOpenApplicationDossier={(app) => setInspectingApp(app)}
+                currentRole={currentUser}
+              />
+            </RequireRole>
+          )}
 
-        {activeTab === 'leases' && (
-          <LeaseValidityRadar
-            leaseDocs={leaseDocs}
-            onUploadRenewedDoc={handleUploadRenewedDoc}
-            onVerifyRenewedDoc={() => {}}
-            currentRole={currentRole}
-          />
-        )}
+          {/* Undertakings Tab */}
+          {activeTab === 'undertakings' && (
+            <UndertakingsTracker
+              undertakings={visibleUndertakings}
+              onUploadComplianceEvidence={handleUploadComplianceEvidence}
+              onVerifyUndertaking={handleVerifyUndertaking}
+              onAddNewUndertaking={handleAddNewUndertaking}
+              currentRole={currentUser}
+            />
+          )}
 
-        {activeTab === 'escalations' && (
-          <EscalationMatrix
-            notifications={notifications}
-            onMarkNotificationRead={handleMarkNotificationRead}
-            applications={applications}
-            undertakings={undertakings}
-            leaseDocs={leaseDocs}
-            onOpenCaseSummary={(app) => setSummaryApp(app)}
-          />
-        )}
+          {/* Documents Tab */}
+          {activeTab === 'documents' && (
+            <LeaseValidityRadar
+              leaseDocs={visibleLeaseDocs}
+              onUploadRenewedDoc={handleUploadRenewedDoc}
+              onVerifyRenewedDoc={() => {}}
+              currentRole={currentUser}
+            />
+          )}
 
-        {activeTab === 'cpu' && (
-          <CpuSchedulerViewer
-            applications={applications}
-          />
-        )}
+          {/* Alerts / Escalations Tab */}
+          {(activeTab === 'alerts' || activeTab === 'escalations') && (
+            <EscalationMatrix
+              notifications={visibleNotifications}
+              onMarkNotificationRead={handleMarkNotificationRead}
+              applications={visibleApplications}
+              undertakings={visibleUndertakings}
+              leaseDocs={visibleLeaseDocs}
+              onOpenCaseSummary={(app) => setSummaryApp(app)}
+            />
+          )}
 
-        {activeTab === 'audit' && (
-          <AuditTrailViewer
-            applications={applications}
-          />
-        )}
+          {/* Regional Reports Tab (Regional Officer) */}
+          {activeTab === 'region_reports' && (
+            <RequireRole currentRole={currentUser.role} allowedRoles={[Role.REGIONAL_OFFICER]}>
+              <RegionReportsView
+                applications={applications}
+                undertakings={undertakings}
+                leaseDocs={leaseDocs}
+                currentUser={currentUser}
+              />
+            </RequireRole>
+          )}
 
-        {activeTab === 'rules' && (
-          <AphRuleConfigurator
-            rules={aphRules}
-            onUpdateRules={(newRules) => {
-              setAphRules(newRules);
-              triggerToast('APH Rules & SLA parameters saved.');
-            }}
-            currentRole={currentRole}
-          />
-        )}
-      </main>
+          {/* Reports Tab (Bureau Head) */}
+          {activeTab === 'reports' && (
+            <RequireRole currentRole={currentUser.role} allowedRoles={[Role.BUREAU_HEAD]}>
+              <EscalationMatrix
+                notifications={notifications}
+                onMarkNotificationRead={handleMarkNotificationRead}
+                applications={applications}
+                undertakings={undertakings}
+                leaseDocs={leaseDocs}
+                onOpenCaseSummary={(app) => setSummaryApp(app)}
+              />
+            </RequireRole>
+          )}
+
+          {/* Audit Trail Tab */}
+          {activeTab === 'audit' && (
+            <AuditTrailViewer
+              applications={visibleApplications}
+            />
+          )}
+
+          {/* Rules & Configuration Tab (Bureau Head only) */}
+          {activeTab === 'rules' && (
+            <RequireRole currentRole={currentUser.role} allowedRoles={[Role.BUREAU_HEAD]}>
+              <AphRuleConfigurator
+                rules={aphRules}
+                onUpdateRules={(newRules) => {
+                  setAphRules(newRules);
+                  triggerToast('APH Rules & SLA parameters saved.');
+                }}
+                currentRole={currentUser}
+              />
+            </RequireRole>
+          )}
+
+          {/* Integrations Tab (Bureau Head only) */}
+          {activeTab === 'integrations' && (
+            <RequireRole currentRole={currentUser.role} allowedRoles={[Role.BUREAU_HEAD]}>
+              <IntegrationsView />
+            </RequireRole>
+          )}
+        </main>
+      </div>
 
       {/* 4. Bottom Regulatory Safeguard Banner */}
       <footer className="regulatory-banner">
@@ -676,7 +850,15 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Modals */}
+      {/* 3-Card Role Selector Modal for Demo */}
+      <RoleLoginModal
+        isOpen={isRoleSelectorOpen}
+        currentRole={currentUser}
+        onSelectRole={handleSelectRole}
+        onClose={() => setIsRoleSelectorOpen(false)}
+      />
+
+      {/* Application Full Dossier Modal */}
       {inspectingApp && (
         <ApplicationDetailsModal
           application={inspectingApp}
@@ -689,6 +871,7 @@ export default function App() {
         />
       )}
 
+      {/* Electronic Case Summary Printable Modal */}
       {summaryApp && (
         <CaseSummaryModal
           application={summaryApp}
@@ -696,9 +879,10 @@ export default function App() {
         />
       )}
 
+      {/* Notification Stream Modal */}
       {isNotificationsOpen && (
         <NotificationsModal
-          notifications={notifications}
+          notifications={visibleNotifications}
           onClose={() => setIsNotificationsOpen(false)}
           onMarkRead={handleMarkNotificationRead}
           onMarkAllRead={handleMarkAllNotificationsRead}

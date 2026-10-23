@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Send
 } from 'lucide-react';
+import { Permission, usePermissions, Role } from '../lib/permissions';
 
 export function UndertakingsTracker({ 
   undertakings, 
@@ -21,6 +22,7 @@ export function UndertakingsTracker({
   onAddNewUndertaking,
   currentRole 
 }) {
+  const { can, getRestrictionReason } = usePermissions(currentRole);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -295,24 +297,48 @@ export function UndertakingsTracker({
                       <div style={{ display: 'flex', gap: '6px' }}>
                         {/* Upload Evidence button */}
                         {u.status !== 'Verified & Closed' && (
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleOpenUpload(u)}
-                            title="Institution portal upload compliance evidence"
-                          >
-                            <UploadCloud size={13} /> Upload Proof
-                          </button>
+                          can(Permission.UPLOAD_COMPLIANCE_EVIDENCE) ? (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleOpenUpload(u)}
+                              title="Institution portal upload compliance evidence"
+                              id={`btn-upload-evidence-${u.id}`}
+                            >
+                              <UploadCloud size={13} /> Upload Proof
+                            </button>
+                          ) : (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              disabled
+                              style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                              title={getRestrictionReason(Permission.UPLOAD_COMPLIANCE_EVIDENCE)}
+                            >
+                              <UploadCloud size={13} /> Upload Proof
+                            </button>
+                          )
                         )}
 
                         {/* Officer Verify button */}
                         {u.status === 'Submitted' && (
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleOpenVerify(u)}
-                            title="AICTE Regional Officer review & verification"
-                          >
-                            <CheckCircle2 size={13} /> Verify Evidence
-                          </button>
+                          can(Permission.VERIFY_REJECT_UNDERTAKING) ? (
+                            <button
+                              className="btn btn-primary btn-sm"
+                              onClick={() => handleOpenVerify(u)}
+                              title="AICTE Regional Officer review & verification"
+                              id={`btn-verify-evidence-${u.id}`}
+                            >
+                              <CheckCircle2 size={13} /> Verify Evidence
+                            </button>
+                          ) : (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              disabled
+                              style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                              title={getRestrictionReason(Permission.VERIFY_REJECT_UNDERTAKING)}
+                            >
+                              <CheckCircle2 size={13} /> Verify Evidence
+                            </button>
+                          )
                         )}
                       </div>
                     </td>
