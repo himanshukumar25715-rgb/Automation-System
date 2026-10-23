@@ -1,0 +1,21 @@
+{
+  "name": "aicte-automation-system",
+  "version": "1.0.0",
+  "description": "Unified Digital Platform for AICTE Approval Automation, CPU Scheduling Dispatcher & Compliance Monitoring",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run start",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm run start"
+  },
+  "keywords": [
+    "aicte",
+    "sih2024",
+    "approval-automation",
+    "cpu-scheduling",
+    "compliance-monitoring"
+  ],
+  "author": "Himanshu Kumar",
+  "license": "MIT"
+}
