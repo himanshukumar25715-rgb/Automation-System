@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   INITIAL_APPLICATIONS, 
   INITIAL_UNDERTAKINGS, 
@@ -7,6 +7,7 @@ import {
   INITIAL_APH_RULES, 
   WORKFLOW_ROUTES 
 } from './data/mockData';
+import { api } from './services/api';
 
 import { Role, DEMO_PROFILES, usePermissions, RequireRole } from './lib/permissions';
 import { Header } from './components/Header';
@@ -48,6 +49,19 @@ export default function App() {
   const [summaryApp, setSummaryApp] = useState(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [lastActionMessage, setLastActionMessage] = useState('');
+  const [apiOnline, setApiOnline] = useState(false);
+
+  // Check Backend REST API connectivity
+  useEffect(() => {
+    let isMounted = true;
+    api.checkHealth().then(res => {
+      if (isMounted && res && res.status === 'ONLINE') {
+        setApiOnline(true);
+        console.log('[AICTE PRAGATI-NAV] Connected to Backend REST API at http://localhost:5000');
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
 
   // Hook for strict RBAC and data scoping
   const { 
@@ -667,6 +681,7 @@ export default function App() {
         unreadCount={counts.alerts}
         onOpenNotifications={() => setIsNotificationsOpen(true)}
         overdueCount={applications.filter(a => a.daysInCurrentStage > a.slaDays).length}
+        apiOnline={apiOnline}
       />
 
       {/* 2. Interactive Time-Travel & Escalation Simulation Bar */}

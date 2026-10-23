@@ -23,7 +23,8 @@ export function Header({
   simDaysOffset, 
   unreadCount,
   onOpenNotifications,
-  overdueCount
+  overdueCount,
+  apiOnline = false
 }) {
   const getSimulatedDate = () => {
     const d = new Date(2026, 9, 23);
@@ -139,6 +140,32 @@ export function Header({
             </div>
 
             <ChevronDown size={14} color="#94a3b8" />
+          </div>
+
+          {/* Backend API Connection Indicator */}
+          <div 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: apiOnline ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+              border: `1px solid ${apiOnline ? 'rgba(16, 185, 129, 0.4)' : 'rgba(245, 158, 11, 0.4)'}`,
+              borderRadius: '8px',
+              padding: '6px 10px',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              color: apiOnline ? '#34d399' : '#fbbf24'
+            }}
+            title={apiOnline ? 'Backend Express REST API running on port 5000' : 'Backend in Standalone Mode (using local in-memory store)'}
+          >
+            <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: apiOnline ? '#10b981' : '#f59e0b',
+              boxShadow: apiOnline ? '0 0 8px #10b981' : 'none'
+            }}></span>
+            <span>{apiOnline ? 'API Connected' : 'Standalone'}</span>
           </div>
 
           {/* Notification Bell */}
