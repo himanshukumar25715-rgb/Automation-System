@@ -56,24 +56,24 @@ export function Header({
       {/* Left: Clean Brand Logo & Tag */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <div style={{
-            width: '34px',
-            height: '34px',
-            borderRadius: '2px',
-            background: '#ffffff',
-            border: '1px solid #cbd5e1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 5px rgba(15, 23, 42, 0.08)',
-            padding: '2px'
-          }}>
-            <img 
-              src="/GovVerify.svg" 
-              alt="GovVerify" 
-              style={{ width: '26px', height: '26px', objectFit: 'contain' }} 
-            />
-          </div>
+          <svg 
+            width="32" 
+            height="32" 
+            viewBox="0 0 128 128" 
+            style={{ display: 'block', flexShrink: 0 }}
+            aria-label="GovVerify Logo"
+          >
+            <g transform="translate(16 3) scale(0.52)">
+              {/* Document outline */}
+              <path d="M116 18H47C25 18 10 34 10 56V207C10 229 25 244 47 244H77L58 225H47C36 225 29 218 29 207V56C29 45 36 37 47 37H116Z" fill="#0f172a"/>
+              {/* Folded page corner */}
+              <path d="M132 18H142L185 61V76H148C138 76 132 70 132 60Z" fill="#16a085"/>
+              {/* Document text lines */}
+              <path d="M49 89H119M49 111H130M49 133H101" fill="none" stroke="#0f172a" strokeWidth="9" strokeLinecap="round"/>
+              {/* Integrated verification check */}
+              <path d="M52 174L78 200L157 122" fill="none" stroke="#16a085" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round"/>
+            </g>
+          </svg>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{
               fontFamily: 'var(--font-display)',
