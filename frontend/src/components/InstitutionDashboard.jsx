@@ -9,9 +9,11 @@ import {
   FileText, 
   ShieldCheck, 
   Flame, 
-  ArrowRight,
-  Calendar,
-  FileCheck
+  ArrowRight, 
+  Calendar, 
+  FileCheck,
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 import { WORKFLOW_ROUTES } from '../data/mockData';
 
@@ -44,321 +46,305 @@ export function InstitutionDashboard({
 
   return (
     <div className="institution-dashboard">
-      {/* Institutional Top Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98))',
-        border: '1px solid rgba(56, 189, 248, 0.3)',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '24px',
-        boxShadow: 'var(--shadow-md)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      {/* 1. Page Header (Modern Dark Reference Style) */}
+      <div className="page-header-row">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span className="badge badge-info" style={{ fontSize: '0.78rem' }}>
-              <GraduationCap size={14} /> AICTE Institutional Self-Service Portal
-            </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              Permanent AICTE ID: <strong>{currentUser?.institutionId || '1-748920141'}</strong> • Region: <strong>WRO (Pune)</strong>
-            </span>
+          <div className="page-overline">
+            OVERVIEW
           </div>
-          <h2 style={{ fontSize: '1.45rem', color: '#ffffff' }}>
-            {currentUser?.instituteName || 'Maharashtra Institute of Technology & Research'}
-          </h2>
-          <p style={{ fontSize: '0.84rem', color: '#94a3b8', marginTop: '4px' }}>
-            Welcome back, <strong>{currentUser?.officer || 'Dr. Meera Sen'}</strong>. Track your institutional approvals, submit compliance proofs, and monitor document validity.
+          <h1 className="page-title">
+            Dashboard
+          </h1>
+          <p className="page-subtitle">
+            {currentUser?.instituteName || 'Maharashtra Institute of Technology & Research'} • AICTE ID: {currentUser?.institutionId || '1-748920141'}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button 
-            className="btn btn-secondary btn-sm"
+            className="btn-dark"
             onClick={() => onOpenCaseSummary(myApp)}
           >
-            <FileText size={14} /> View Case Summary Dossier
+            <FileText size={15} />
+            <span>Case Dossier</span>
           </button>
+          
           <button 
-            className="btn btn-primary btn-sm"
-            onClick={() => onNavigateTab('applications')}
+            className="btn-mint"
+            onClick={() => onNavigateTab('documents')}
+            id="btn-upload-documents-top"
           >
-            <span>My Application Tracker</span>
-            <ArrowRight size={14} />
+            <UploadCloud size={16} strokeWidth={2.5} />
+            <span>Upload Documents</span>
           </button>
         </div>
       </div>
 
-      {/* Urgent Action Banner if Document Critical */}
+      {/* 2. 4-Card Metric Grid */}
+      <div className="metric-grid">
+        {/* Card 1: Application Status */}
+        <div className="metric-card">
+          <div className="metric-card-left">
+            <span className="metric-label">CURRENT STAGE</span>
+            <span className="metric-value" style={{ fontSize: '1.75rem', marginTop: '6px' }}>
+              {myApp.currentStage}
+            </span>
+          </div>
+          <div className="metric-icon-wrap" style={{ color: 'var(--text-muted)' }}>
+            <FileText size={32} strokeWidth={1.8} />
+          </div>
+        </div>
+
+        {/* Card 2: SLA Status */}
+        <div className="metric-card">
+          <div className="metric-card-left">
+            <span className="metric-label">STAGE DURATION</span>
+            <span className="metric-value">
+              {myApp.daysInCurrentStage}<span style={{ fontSize: '1.1rem', color: 'var(--text-dim)' }}>/{myApp.slaDays}d</span>
+            </span>
+          </div>
+          <div className="metric-icon-wrap" style={{ color: myApp.daysInCurrentStage > myApp.slaDays ? 'var(--ruby-500)' : 'var(--mint-500)' }}>
+            {myApp.daysInCurrentStage > myApp.slaDays ? (
+              <AlertCircle size={32} strokeWidth={1.8} />
+            ) : (
+              <ShieldCheck size={32} strokeWidth={1.8} />
+            )}
+          </div>
+        </div>
+
+        {/* Card 3: Active Undertakings */}
+        <div className="metric-card">
+          <div className="metric-card-left">
+            <span className="metric-label">PENDING UNDERTAKINGS</span>
+            <span className="metric-value">{undertakings.filter(u => u.status !== 'Verified & Closed').length}</span>
+          </div>
+          <div className="metric-icon-wrap" style={{ color: 'var(--amber-400)' }}>
+            <AlertTriangle size={32} strokeWidth={1.8} />
+          </div>
+        </div>
+
+        {/* Card 4: Document Expiry */}
+        <div className="metric-card">
+          <div className="metric-card-left">
+            <span className="metric-label">DOCUMENT VALIDITY</span>
+            <span className="metric-value" style={{ color: criticalDoc ? 'var(--ruby-600)' : 'var(--text-main)' }}>
+              {criticalDoc ? `${criticalDoc.daysRemaining}d` : 'Valid'}
+            </span>
+          </div>
+          <div className="metric-icon-wrap" style={{ color: criticalDoc ? 'var(--ruby-600)' : 'var(--emerald-600)' }}>
+            <FileCheck size={32} strokeWidth={1.8} />
+          </div>
+        </div>
+      </div>
+
+      {/* Critical Alert Banner if Deed or Fire NOC expiring */}
       {criticalDoc && (
         <div style={{
-          background: 'linear-gradient(90deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.15))',
-          border: '1px solid rgba(239, 68, 68, 0.45)',
-          borderRadius: '12px',
-          padding: '16px 20px',
-          marginBottom: '24px',
+          background: '#fff1f2',
+          border: '1px solid #fecdd3',
+          borderRadius: '2px',
+          padding: '14px 18px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          marginBottom: '28px',
           flexWrap: 'wrap',
-          gap: '14px'
+          gap: '12px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              background: 'rgba(239, 68, 68, 0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#f87171'
-            }}>
-              <Flame size={22} />
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <AlertCircle size={20} color="var(--ruby-600)" />
             <div>
-              <div style={{ fontWeight: 700, color: '#f87171', fontSize: '0.9rem' }}>
-                Action Required: {criticalDoc.docType} Expiring in {criticalDoc.daysRemaining} Days
+              <div style={{ fontWeight: 700, color: '#991b1b', fontSize: '0.88rem' }}>
+                Urgent: {criticalDoc.docType} expires in {criticalDoc.daysRemaining} days!
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '2px' }}>
-                Document No: <strong>{criticalDoc.docNumber}</strong> (Expires: {criticalDoc.expiryDate}). Please upload certified renewed copy to avoid regulatory hold on your approval.
+              <div style={{ fontSize: '0.76rem', color: '#7f1d1d' }}>
+                Document Ref: {criticalDoc.docNumber}. Per APH 2024–27 Chapter I, expired deeds freeze Extension of Approval (EoA).
               </div>
             </div>
           </div>
 
           <button 
-            className="btn btn-warning btn-sm"
-            onClick={() => onOpenUploadLease(criticalDoc)}
-            id="btn-inst-upload-lease"
+            className="btn-mint"
+            style={{ padding: '7px 14px', fontSize: '0.78rem' }}
+            onClick={() => onNavigateTab('documents')}
           >
-            <UploadCloud size={14} /> Upload Renewed Document
+            Upload Renewal
           </button>
         </div>
       )}
 
-      {/* 4 KPI Cards for Institution */}
-      <div className="kpi-grid" style={{ marginBottom: '24px' }}>
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Active Application</span>
-            <div className="kpi-icon-wrap" style={{ color: '#38bdf8' }}>
-              <FileText size={18} />
-            </div>
-          </div>
-          <div className="kpi-value" style={{ fontSize: '1.4rem' }}>{myApp.id}</div>
-          <div className="kpi-subtext">Current Stage: <strong>{myApp.currentStage}</strong></div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Prescribed Route</span>
-            <div className="kpi-icon-wrap" style={{ color: '#c084fc' }}>
-              <Building2 size={18} />
-            </div>
-          </div>
-          <div className="kpi-value" style={{ fontSize: '1.3rem' }}>{routeInfo.title}</div>
-          <div className="kpi-subtext">{myApp.type}</div>
-        </div>
-
-        <div className="kpi-card alert-amber">
-          <div className="kpi-header">
-            <span className="kpi-title" style={{ color: '#fbbf24' }}>Active Undertaking</span>
-            <div className="kpi-icon-wrap" style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)' }}>
-              <Clock size={18} />
-            </div>
-          </div>
-          <div className="kpi-value" style={{ color: '#fbbf24', fontSize: '1.4rem' }}>
-            {pendingUndertaking ? `${pendingUndertaking.daysRemaining} Days Left` : 'All Cleared'}
-          </div>
-          <div className="kpi-subtext" style={{ color: '#fde68a' }}>
-            {pendingUndertaking ? `Due: ${pendingUndertaking.dueDate}` : 'Complied'}
-          </div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Deficiencies</span>
-            <div className="kpi-icon-wrap" style={{ color: '#34d399' }}>
-              <CheckCircle2 size={18} />
-            </div>
-          </div>
-          <div className="kpi-value" style={{ color: '#34d399', fontSize: '1.4rem' }}>0 Pending</div>
-          <div className="kpi-subtext">Preliminary Scrutiny Passed</div>
-        </div>
+      {/* 3. Section Header: RECENT DOCUMENTS & View all -> */}
+      <div className="section-header-clean">
+        <span className="section-label">RECENT DOCUMENTS</span>
+        <button 
+          className="section-link"
+          onClick={() => onNavigateTab('documents')}
+          id="btn-view-all-docs"
+        >
+          <span>View all</span>
+          <ArrowRight size={14} />
+        </button>
       </div>
 
-      {/* Main Panel: Application Stage Progression Stepper */}
-      <div className="panel">
-        <div className="panel-header">
+      {/* Documents Table or Empty State */}
+      {leaseDocs.length === 0 ? (
+        <div className="empty-state-box">
+          <FileText size={36} color="var(--text-dim)" />
+          <p className="empty-state-text">
+            No documents yet. Upload your registered 30-year lease deed, building safety certificate, or fire NOC to start verifying.
+          </p>
+          <button 
+            className="btn-dark"
+            onClick={() => onNavigateTab('documents')}
+          >
+            <UploadCloud size={15} />
+            <span>Upload documents</span>
+          </button>
+        </div>
+      ) : (
+        <div className="table-wrap-clean" style={{ marginBottom: '32px' }}>
+          <table className="table-clean">
+            <thead>
+              <tr>
+                <th>Document Type</th>
+                <th>Registration / Ref No</th>
+                <th>Jurisdiction</th>
+                <th>Expiry Date</th>
+                <th>Days Remaining</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaseDocs.map(doc => {
+                const isUrgent = doc.daysRemaining <= 90;
+                return (
+                  <tr key={doc.id}>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{doc.docType}</div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)' }}>{doc.institute}</div>
+                    </td>
+                    <td>
+                      <span style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                        {doc.docNumber}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="status-pill purple">{doc.region}</span>
+                    </td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                      {doc.expiryDate}
+                    </td>
+                    <td>
+                      <span style={{
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        color: isUrgent ? 'var(--ruby-600)' : 'var(--emerald-600)'
+                      }}>
+                        {doc.daysRemaining} days left
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`status-pill ${
+                        doc.severity === 'critical' ? 'ruby' :
+                        doc.severity === 'warning' ? 'amber' : 'mint'
+                      }`}>
+                        {doc.status}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        className="btn-dark"
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', borderRadius: '2px' }}
+                        onClick={() => onNavigateTab('documents')}
+                      >
+                        {isUrgent ? 'Renew Now' : 'Inspect'}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* 4. Active Approval Stage Pipeline Stepper */}
+      <div className="section-header-clean">
+        <span className="section-label">ACTIVE APPROVAL STAGE PIPELINE</span>
+        <button 
+          className="section-link"
+          onClick={() => onNavigateTab('applications')}
+        >
+          <span>Track Application</span>
+          <ArrowRight size={14} />
+        </button>
+      </div>
+
+      <div className="panel-clean" style={{ borderRadius: '2px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
-            <h3 className="panel-title">
-              <Clock size={18} color="#38bdf8" /> Milestone Timeline & Stage Progression
-            </h3>
-            <p style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-              Live statutory tracking under AICTE Approval Process Handbook (APH)
-            </p>
+            <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '1rem' }}>
+              Application ID: {myApp.id}
+            </span>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+              Route: <strong>{routeInfo.title}</strong> • Stage {myApp.stageIndex} of {routeInfo.stages.length}
+            </div>
           </div>
-          <div className="sla-pill sla-normal">
-            <span>Applied: {myApp.appliedDate}</span>
-          </div>
+
+          <span className={`status-pill ${
+            myApp.status === 'Approved' ? 'mint' :
+            myApp.daysInCurrentStage > myApp.slaDays ? 'ruby' : 'cyan'
+          }`}>
+            {myApp.daysInCurrentStage > myApp.slaDays ? `SLA Breached (${myApp.daysInCurrentStage}d)` : myApp.status}
+          </span>
         </div>
 
-        <div className="progress-stepper" style={{ margin: '30px 20px 40px 20px' }}>
-          <div className="stepper-track" />
-          {routeInfo.stages.map((st, i) => {
-            const isCompleted = i < myApp.stageIndex;
-            const isActive = i === myApp.stageIndex;
+        {/* Linear Stepper */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${routeInfo.stages.length}, 1fr)`,
+          gap: '10px'
+        }}>
+          {routeInfo.stages.map((st, idx) => {
+            const isCompleted = idx < myApp.stageIndex;
+            const isCurrent = idx === myApp.stageIndex;
             return (
               <div 
                 key={st}
-                className={`step-node ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
+                style={{
+                  background: isCurrent ? '#0f172a' : isCompleted ? '#ffffff' : '#f8fafc',
+                  border: isCurrent ? '1px solid #0f172a' : isCompleted ? '1px solid #cbd5e1' : '1px solid var(--border-subtle)',
+                  borderRadius: '2px',
+                  padding: '12px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  boxShadow: isCurrent ? '0 2px 4px rgba(15, 23, 42, 0.15)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
               >
-                <div className="step-circle">{isCompleted ? '✓' : i + 1}</div>
-                <span className="step-title">{st}</span>
-              </div>
-            );
-          })}
-        </div>
-
-        <div style={{
-          background: 'rgba(15, 23, 42, 0.7)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: '10px',
-          padding: '16px 20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px'
-        }}>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#ffffff' }}>
-              Current Status: Awaiting EVC Expert Committee Allocation by WRO
-            </div>
-            <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginTop: '2px' }}>
-              Preliminary Scrutiny has been successfully verified. AICTE Western Regional Office is constituting a 3-member Expert Committee.
-            </div>
-          </div>
-
-          <button 
-            className="btn btn-secondary btn-sm"
-            onClick={() => onNavigateTab('applications')}
-          >
-            Track Application Details →
-          </button>
-        </div>
-      </div>
-
-      {/* Two columns: Conditional Undertakings & Document Deadlines */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px' }}>
-        
-        {/* Undertakings Box */}
-        <div className="panel" style={{ margin: 0 }}>
-          <div className="panel-header">
-            <div>
-              <h3 className="panel-title" style={{ fontSize: '1.05rem' }}>
-                <ShieldCheck size={18} color="#38bdf8" /> Time-Bound Undertakings
-              </h3>
-              <p style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                Conditions attached to previous AICTE approvals
-              </p>
-            </div>
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={() => onNavigateTab('undertakings')}
-            >
-              View All
-            </button>
-          </div>
-
-          {undertakings.map(u => (
-            <div key={u.id} style={{
-              background: 'rgba(15, 23, 42, 0.6)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '8px',
-              padding: '14px',
-              marginBottom: '10px'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 700, color: '#38bdf8', fontSize: '0.82rem' }}>{u.id}</span>
-                <span className={`badge ${u.status === 'Submitted' ? 'badge-warning' : 'badge-info'}`}>
-                  {u.status}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.82rem', color: '#e2e8f0' }}>{u.condition}</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-                <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                  Deadline: <strong>{u.dueDate}</strong> ({u.daysRemaining} days left)
-                </span>
-                {u.status !== 'Submitted' && (
-                  <button 
-                    className="btn btn-primary btn-sm"
-                    onClick={() => onOpenUploadUndertaking(u)}
-                    id={`btn-inst-upload-und-${u.id}`}
-                  >
-                    <UploadCloud size={13} /> Upload Proof
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Documents Box */}
-        <div className="panel" style={{ margin: 0 }}>
-          <div className="panel-header">
-            <div>
-              <h3 className="panel-title" style={{ fontSize: '1.05rem' }}>
-                <FileCheck size={18} color="#fbbf24" /> Land & Safety Document Expiry Radar
-              </h3>
-              <p style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                Continuous statutory document validity tracking
-              </p>
-            </div>
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={() => onNavigateTab('documents')}
-            >
-              View All
-            </button>
-          </div>
-
-          {leaseDocs.map(d => {
-            const isCritical = d.daysRemaining <= 90;
-            return (
-              <div key={d.id} style={{
-                background: 'rgba(15, 23, 42, 0.6)',
-                border: `1px solid ${isCritical ? 'rgba(239, 68, 68, 0.4)' : 'var(--border-subtle)'}`,
-                borderRadius: '8px',
-                padding: '14px',
-                marginBottom: '10px'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.82rem', color: '#f8fafc' }}>{d.docType}</div>
-                  <span className={`badge ${isCritical ? 'badge-critical' : 'badge-success'}`}>
-                    {isCritical ? `${d.daysRemaining}d Left` : 'Active'}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: isCurrent ? '#94a3b8' : isCompleted ? 'var(--emerald-600)' : 'var(--text-dim)'
+                  }}>
+                    STEP 0{idx + 1}
                   </span>
+                  {isCompleted && <CheckCircle2 size={13} color="var(--emerald-600)" />}
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>No: {d.docNumber} • Expires: {d.expiryDate}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-                  <span style={{ fontSize: '0.72rem', color: isCritical ? '#fca5a5' : '#94a3b8' }}>
-                    {isCritical ? 'Mandatory renewal required' : 'Verified compliance'}
-                  </span>
-                  <button 
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => onOpenUploadLease(d)}
-                  >
-                    <UploadCloud size={13} /> Upload Renewal
-                  </button>
+                <div style={{
+                  fontSize: '0.8rem',
+                  fontWeight: isCurrent ? 700 : 600,
+                  color: isCurrent ? '#ffffff' : isCompleted ? 'var(--text-main)' : 'var(--text-dim)'
+                }}>
+                  {st}
                 </div>
               </div>
             );
           })}
         </div>
-
       </div>
     </div>
   );

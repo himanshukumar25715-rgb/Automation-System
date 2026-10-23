@@ -38,30 +38,31 @@ export function AuditTrailViewer({ applications }) {
     <div className="audit-trail-viewer">
       {/* Top Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
+        background: '#ffffff',
         border: '1px solid var(--border-medium)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: '2px',
         padding: '18px 24px',
         marginBottom: '24px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '16px'
+        gap: '16px',
+        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="badge badge-success">
               <ShieldCheck size={13} /> Immutable Digital Audit Trail
             </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
               Cryptographically Verified Activity Log (SHA-256 Hashing)
             </span>
           </div>
-          <h2 style={{ fontSize: '1.35rem', marginTop: '6px' }}>
+          <h2 style={{ fontSize: '1.35rem', marginTop: '6px', color: 'var(--text-main)' }}>
             System-Wide Traceability & Workflow Event Ledger
           </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
+          <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
             Complete tamper-evident record of all application transitions, deficiency notices, EVC allocations, compliance verifications, and escalations.
           </p>
         </div>
@@ -144,7 +145,7 @@ export function AuditTrailViewer({ applications }) {
                     </div>
                   </td>
                   <td style={{ maxWidth: '380px' }}>
-                    <div style={{ color: log.action.includes('Escalation') ? '#fca5a5' : '#e2e8f0' }}>
+                    <div style={{ color: log.action.includes('Escalation') ? '#dc2626' : 'var(--text-main)', fontWeight: log.action.includes('Escalation') ? 600 : 400 }}>
                       {log.action}
                     </div>
                   </td>
@@ -152,10 +153,11 @@ export function AuditTrailViewer({ applications }) {
                     <span style={{ 
                       fontFamily: 'monospace', 
                       fontSize: '0.72rem', 
-                      color: '#34d399', 
-                      background: 'rgba(16, 185, 129, 0.1)',
+                      color: '#059669', 
+                      background: '#ecfdf5',
+                      border: '1px solid #a7f3d0',
                       padding: '2px 6px',
-                      borderRadius: '4px',
+                      borderRadius: '2px',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px'

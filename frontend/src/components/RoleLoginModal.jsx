@@ -2,16 +2,11 @@ import React, { useState } from 'react';
 import { 
   Building2, 
   ShieldCheck, 
-  Layers, 
-  MapPin, 
   CheckCircle2, 
   X, 
   ArrowRight,
   GraduationCap,
-  Users,
-  Sliders,
-  FileCheck,
-  AlertTriangle
+  Users
 } from 'lucide-react';
 import { Role } from '../lib/permissions';
 import { AICTE_REGIONS } from '../data/mockData';
@@ -55,289 +50,256 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
   };
 
   return (
-    <div className="modal-overlay" style={{ zIndex: 9999 }}>
-      <div className="modal-card" style={{ maxWidth: '1060px', padding: '32px' }}>
+    <div className="modal-backdrop-clean">
+      <div className="modal-sheet-clean" style={{ maxWidth: '980px', padding: '32px' }}>
         {/* Modal Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <span className="badge badge-purple" style={{ fontSize: '0.78rem' }}>
-                <ShieldCheck size={14} /> AICTE PRAGATI-NAV Role-Based Access Control
-              </span>
-              <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                Interactive Role Selection for Evaluation
-              </span>
+            <div className="page-overline">
+              PERSONA SELECTOR
             </div>
-            <h2 style={{ fontSize: '1.6rem', color: '#ffffff', letterSpacing: '-0.02em' }}>
-              Select User Role Persona
+            <h2 style={{ fontSize: '1.5rem', color: 'var(--text-main)', letterSpacing: '-0.025em', margin: '4px 0 0 0' }}>
+              Select Role Persona
             </h2>
-            <p style={{ fontSize: '0.86rem', color: '#94a3b8', marginTop: '4px' }}>
-              Experience strict role-based data isolation, custom dashboards, dedicated sidebars, and tailored permission sets.
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+              Switch between AICTE role personas to evaluate strict data isolation, tailored sidebars, and approval permissions.
             </p>
           </div>
 
           {onClose && (
-            <button className="btn btn-secondary btn-sm" onClick={onClose} title="Close without changing">
+            <button className="btn-icon-sq" onClick={onClose} title="Close without changing" style={{ borderRadius: '2px' }}>
               <X size={16} />
             </button>
           )}
         </div>
 
         {/* 3-Card Role Selector */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px', marginBottom: '24px' }}>
           
           {/* Card 1: Institution (Applicant) */}
           <div 
             style={{
-              background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%)',
-              border: currentRole?.role === Role.INSTITUTION ? '2px solid #38bdf8' : '1px solid var(--border-medium)',
-              borderRadius: '16px',
-              padding: '24px',
+              background: '#ffffff',
+              border: currentRole?.role === Role.INSTITUTION ? '2px solid #0f172a' : '1px solid var(--border-medium)',
+              borderRadius: '2px',
+              padding: '22px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              boxShadow: currentRole?.role === Role.INSTITUTION ? '0 0 24px rgba(56, 189, 248, 0.25)' : 'var(--shadow-md)',
-              position: 'relative',
-              overflow: 'hidden'
+              boxShadow: currentRole?.role === Role.INSTITUTION ? '0 4px 12px rgba(15, 23, 42, 0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
+              transition: 'all 0.2s ease'
             }}
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <div style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '2px',
                   background: 'linear-gradient(135deg, #0284c7, #0369a1)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#ffffff'
                 }}>
-                  <GraduationCap size={24} />
+                  <GraduationCap size={20} />
                 </div>
-                <span className="badge badge-info">Applicant Portal</span>
+                <span className="status-pill cyan">Applicant</span>
               </div>
 
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>Institution (Applicant)</h3>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '1.15rem', color: 'var(--text-main)', marginBottom: '2px' }}>Institution</h3>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
                 Dr. Meera Sen, Principal
               </div>
 
               <div style={{
-                background: 'rgba(15, 23, 42, 0.6)',
+                background: '#f8fafc',
                 border: '1px solid var(--border-subtle)',
-                borderRadius: '8px',
+                borderRadius: '2px',
                 padding: '10px 12px',
-                fontSize: '0.78rem',
-                marginBottom: '16px'
+                fontSize: '0.76rem',
+                marginBottom: '14px'
               }}>
-                <div style={{ fontWeight: 600, color: '#f8fafc' }}>Maharashtra Institute of Tech & Research</div>
-                <div style={{ color: '#94a3b8', fontSize: '0.72rem' }}>ID: 1-748920141 • Region: WRO (Pune)</div>
+                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Maharashtra Institute of Tech & Research</div>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>ID: 1-748920141 • Region: WRO</div>
               </div>
 
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Sees ONLY own applications & deadlines</span>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Sees ONLY own applications & deadlines</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Respond to returned deficiency items</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Respond to returned deficiency items</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Upload undertaking proofs & lease renewals</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f87171' }}>
-                  <X size={14} /> <span>No access to other colleges or officer remarks</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Upload undertaking proofs & lease renewals</span>
                 </div>
               </div>
             </div>
 
             <button 
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: '0.88rem' }}
+              className={currentRole?.role === Role.INSTITUTION ? "btn-mint" : "btn-dark"}
+              style={{ width: '100%', justifyContent: 'center', borderRadius: '2px' }}
               onClick={handleSelectInstitution}
               id="btn-login-institution"
             >
-              <span>Enter as Institution</span>
-              <ArrowRight size={15} />
+              <span>{currentRole?.role === Role.INSTITUTION ? 'Currently Active' : 'Enter as Institution'}</span>
+              <ArrowRight size={14} />
             </button>
           </div>
 
           {/* Card 2: Regional Officer */}
           <div 
             style={{
-              background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%)',
-              border: currentRole?.role === Role.REGIONAL_OFFICER ? '2px solid #34d399' : '1px solid var(--border-medium)',
-              borderRadius: '16px',
-              padding: '24px',
+              background: '#ffffff',
+              border: currentRole?.role === Role.REGIONAL_OFFICER ? '2px solid #0f172a' : '1px solid var(--border-medium)',
+              borderRadius: '2px',
+              padding: '22px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              boxShadow: currentRole?.role === Role.REGIONAL_OFFICER ? '0 0 24px rgba(16, 185, 129, 0.25)' : 'var(--shadow-md)',
-              position: 'relative',
-              overflow: 'hidden'
+              boxShadow: currentRole?.role === Role.REGIONAL_OFFICER ? '0 4px 12px rgba(15, 23, 42, 0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
+              transition: 'all 0.2s ease'
             }}
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <div style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '2px',
                   background: 'linear-gradient(135deg, #059669, #047857)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#ffffff'
                 }}>
-                  <ShieldCheck size={24} />
+                  <ShieldCheck size={20} />
                 </div>
-                <span className="badge badge-success">Regional Authority</span>
+                <span className="status-pill mint">Regional Desk</span>
               </div>
 
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>Regional Officer</h3>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '12px' }}>
-                Scrutiny, EVC & Approval Officer
+              <h3 style={{ fontSize: '1.15rem', color: 'var(--text-main)', marginBottom: '2px' }}>Regional Officer</h3>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
+                Dr. R.K. Patil, RO ({selectedRegion})
               </div>
 
-              {/* Region Selector for Demo */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.74rem', color: '#94a3b8', marginBottom: '4px', fontWeight: 600 }}>
-                  Select Assigned AICTE Region:
-                </label>
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '2px',
+                padding: '10px 12px',
+                fontSize: '0.76rem',
+                marginBottom: '14px'
+              }}>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.7rem', marginBottom: '4px' }}>Select Regional Office:</div>
                 <select 
-                  className="form-select"
+                  className="select-clean"
+                  style={{ width: '100%', padding: '6px 10px', fontSize: '0.78rem', borderRadius: '2px' }}
                   value={selectedRegion}
                   onChange={(e) => setSelectedRegion(e.target.value)}
-                  style={{ fontSize: '0.8rem', padding: '8px 10px' }}
                 >
-                  {AICTE_REGIONS.map(reg => (
-                    <option key={reg.code} value={reg.code}>
-                      {reg.code} - {reg.name} ({reg.hq})
-                    </option>
+                  {AICTE_REGIONS.map(r => (
+                    <option key={r.code} value={r.code}>{r.code} - {r.name} ({r.hq})</option>
                   ))}
                 </select>
               </div>
 
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Sees ONLY applications in selected region</span>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Advance stages & issue deficiency notices</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Advance stage, or revert with deficiency reason</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Formulate 3-expert EVC committee</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Schedule EVC panels & verify undertakings</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f87171' }}>
-                  <X size={14} /> <span>Cannot view other regions or edit rules</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Verify undertakings & land deeds</span>
                 </div>
               </div>
             </div>
 
             <button 
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: '0.88rem', background: 'linear-gradient(135deg, #059669, #047857)' }}
+              className={currentRole?.role === Role.REGIONAL_OFFICER ? "btn-mint" : "btn-dark"}
+              style={{ width: '100%', justifyContent: 'center', borderRadius: '2px' }}
               onClick={handleSelectRegionalOfficer}
               id="btn-login-ro"
             >
-              <span>Enter as Regional Officer ({selectedRegion})</span>
-              <ArrowRight size={15} />
+              <span>{currentRole?.role === Role.REGIONAL_OFFICER ? 'Currently Active' : `Enter as RO (${selectedRegion})`}</span>
+              <ArrowRight size={14} />
             </button>
           </div>
 
-          {/* Card 3: Bureau Head */}
+          {/* Card 3: Bureau Head (HQ) */}
           <div 
             style={{
-              background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%)',
-              border: currentRole?.role === Role.BUREAU_HEAD ? '2px solid #c084fc' : '1px solid var(--border-medium)',
-              borderRadius: '16px',
-              padding: '24px',
+              background: '#ffffff',
+              border: currentRole?.role === Role.BUREAU_HEAD ? '2px solid #0f172a' : '1px solid var(--border-medium)',
+              borderRadius: '2px',
+              padding: '22px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              boxShadow: currentRole?.role === Role.BUREAU_HEAD ? '0 0 24px rgba(192, 132, 252, 0.25)' : 'var(--shadow-md)',
-              position: 'relative',
-              overflow: 'hidden'
+              boxShadow: currentRole?.role === Role.BUREAU_HEAD ? '0 4px 12px rgba(15, 23, 42, 0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
+              transition: 'all 0.2s ease'
             }}
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <div style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '2px',
+                  background: 'linear-gradient(135deg, #0f172a, #334155)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#ffffff'
                 }}>
-                  <Layers size={24} />
+                  <Building2 size={20} />
                 </div>
-                <span className="badge badge-purple">National HQ</span>
+                <span className="status-pill purple">National HQ</span>
               </div>
 
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>Bureau Head</h3>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '1.15rem', color: 'var(--text-main)', marginBottom: '2px' }}>Bureau Head (Apex)</h3>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
                 Shri A.K. Sharma, Adviser (Approval Bureau)
               </div>
 
               <div style={{
-                background: 'rgba(15, 23, 42, 0.6)',
+                background: '#f8fafc',
                 border: '1px solid var(--border-subtle)',
-                borderRadius: '8px',
+                borderRadius: '2px',
                 padding: '10px 12px',
-                fontSize: '0.78rem',
-                marginBottom: '16px'
+                fontSize: '0.76rem',
+                marginBottom: '14px'
               }}>
-                <div style={{ fontWeight: 600, color: '#f8fafc' }}>AICTE Headquarters, New Delhi</div>
-                <div style={{ color: '#94a3b8', fontSize: '0.72rem' }}>Jurisdiction: Pan-India (All 8 Regional Offices)</div>
+                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Approval Bureau • AICTE New Delhi</div>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>Full Jurisdiction: All 8 Regional Offices</div>
               </div>
 
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Sees ALL regions, institutions & officers</span>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Pan-India bottleneck & SLA tracking</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Region comparison & bottleneck heatmap</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Apex Level 3 escalation adjudications</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>Handle Tier-3 escalations & reassign cases</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> <span>APH policy rules & system integrations</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#065f46' }}>
+                  <CheckCircle2 size={13} color="#059669" /> <span>Reassign applications between regions</span>
                 </div>
               </div>
             </div>
 
             <button 
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: '0.88rem', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
+              className={currentRole?.role === Role.BUREAU_HEAD ? "btn-mint" : "btn-dark"}
+              style={{ width: '100%', justifyContent: 'center', borderRadius: '2px' }}
               onClick={handleSelectBureauHead}
               id="btn-login-bureau"
             >
-              <span>Enter as Bureau Head (HQ)</span>
-              <ArrowRight size={15} />
+              <span>{currentRole?.role === Role.BUREAU_HEAD ? 'Currently Active' : 'Enter as Bureau Head'}</span>
+              <ArrowRight size={14} />
             </button>
           </div>
-        </div>
-
-        {/* Footer info note */}
-        <div style={{
-          background: 'rgba(15, 23, 42, 0.8)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: '8px',
-          padding: '12px 16px',
-          fontSize: '0.76rem',
-          color: '#94a3b8',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <strong style={{ color: '#f8fafc' }}>Simplified Escalation Chain:</strong> Institution Reminder &rarr; Regional Officer (Level 2) &rarr; Bureau Head / Member Secretary (Level 3).
-          </div>
-          <div style={{ color: '#38bdf8' }}>Demo Sandbox Mode</div>
         </div>
       </div>
     </div>

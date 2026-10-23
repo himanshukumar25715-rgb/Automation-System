@@ -99,30 +99,31 @@ export function IntegrationsView() {
     <div className="integrations-view">
       {/* Top Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
+        background: '#ffffff',
         border: '1px solid var(--border-medium)',
-        borderRadius: '16px',
+        borderRadius: '2px',
         padding: '20px 24px',
         marginBottom: '24px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '16px'
+        gap: '16px',
+        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <span className="badge badge-purple">
               <Network size={13} /> Bureau Head System Administration
             </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
               Inter-Agency Connectivity & Statutory API Bridges
             </span>
           </div>
-          <h2 style={{ fontSize: '1.4rem' }}>
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)' }}>
             AICTE Interoperability & Integration Status Gateway
           </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
+          <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
             Real-time status of land registry verification, DigiLocker academic authentication, and state fire safety gateways.
           </p>
         </div>
@@ -140,12 +141,12 @@ export function IntegrationsView() {
 
       {syncStatusMsg && (
         <div style={{
-          background: 'rgba(16, 185, 129, 0.15)',
-          border: '1px solid rgba(16, 185, 129, 0.4)',
-          borderRadius: '8px',
+          background: '#ecfdf5',
+          border: '1px solid #a7f3d0',
+          borderRadius: '2px',
           padding: '12px 18px',
           marginBottom: '20px',
-          color: '#34d399',
+          color: '#065f46',
           fontSize: '0.84rem',
           display: 'flex',
           alignItems: 'center',
@@ -169,22 +170,23 @@ export function IntegrationsView() {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                gap: '16px'
+                gap: '16px',
+                borderRadius: '2px'
               }}
             >
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                   <div style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(56, 189, 248, 0.12)',
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '2px',
+                    background: 'rgba(2, 132, 199, 0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#38bdf8'
+                    color: '#0284c7'
                   }}>
-                    <Icon size={20} />
+                    <Icon size={18} />
                   </div>
 
                   <span className="badge badge-success">
@@ -192,29 +194,29 @@ export function IntegrationsView() {
                   </span>
                 </div>
 
-                <div style={{ fontSize: '0.72rem', color: '#c084fc', fontWeight: 600, textTransform: 'uppercase' }}>
+                <div style={{ fontSize: '0.72rem', color: '#7c3aed', fontWeight: 600, textTransform: 'uppercase' }}>
                   {item.type}
                 </div>
-                <h3 style={{ fontSize: '1.05rem', margin: '3px 0 6px 0' }}>{item.name}</h3>
-                <p style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                <h3 style={{ fontSize: '1.05rem', margin: '3px 0 6px 0', color: 'var(--text-main)' }}>{item.name}</h3>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
                   {item.description}
                 </p>
               </div>
 
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
+                background: '#f8fafc',
                 border: '1px solid var(--border-subtle)',
-                borderRadius: '8px',
+                borderRadius: '2px',
                 padding: '10px 12px',
                 fontSize: '0.74rem'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ color: '#94a3b8' }}>Endpoint:</span>
-                  <span style={{ color: '#38bdf8', fontFamily: 'monospace' }}>{item.endpoint}</span>
+                  <span style={{ color: '#64748b' }}>Endpoint:</span>
+                  <span style={{ color: '#0284c7', fontFamily: 'monospace' }}>{item.endpoint}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#94a3b8' }}>Latency: <strong>{item.latency}</strong></span>
-                  <span style={{ color: '#cbd5e1' }}>Last sync: {item.lastSync}</span>
+                  <span style={{ color: '#64748b' }}>Latency: <strong>{item.latency}</strong></span>
+                  <span style={{ color: '#475569' }}>Last sync: {item.lastSync}</span>
                 </div>
               </div>
             </div>

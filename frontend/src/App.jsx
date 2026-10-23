@@ -57,7 +57,7 @@ export default function App() {
     api.checkHealth().then(res => {
       if (isMounted && res && res.status === 'ONLINE') {
         setApiOnline(true);
-        console.log('[AICTE PRAGATI-NAV] Connected to Backend REST API at http://localhost:5000');
+        console.log('[GovVerify] Connected to Backend REST API at http://localhost:5000');
       }
     });
     return () => { isMounted = false; };
@@ -682,6 +682,7 @@ export default function App() {
         onOpenNotifications={() => setIsNotificationsOpen(true)}
         overdueCount={applications.filter(a => a.daysInCurrentStage > a.slaDays).length}
         apiOnline={apiOnline}
+        activeTab={activeTab}
       />
 
       {/* 2. Interactive Time-Travel & Escalation Simulation Bar */}
@@ -851,17 +852,17 @@ export default function App() {
       </div>
 
       {/* 4. Bottom Regulatory Safeguard Banner */}
-      <footer className="regulatory-banner">
+      <footer className="regulatory-bar-clean">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className="regulatory-badge">
-            <ShieldAlert size={12} /> AICTE STATUTORY SAFEGUARD
+          <span className="status-pill amber" style={{ fontSize: '0.68rem', padding: '2px 7px' }}>
+            <ShieldAlert size={12} /> STATUTORY SAFEGUARD
           </span>
           <span>
-            Automated recommendations, workflow movements, and deadline notifications assist the approval process under the AICTE Approval Process Handbook (APH). All statutory inspections, verifications, and regulatory approvals remain exclusively reserved for competent AICTE authorities.
+            Automated recommendations & SLA notifications assist APH 2024–27 governance. Final statutory approvals remain exclusively with competent AICTE authorities.
           </span>
         </div>
-        <div style={{ whiteSpace: 'nowrap', opacity: 0.7 }}>
-          National Informatics Platform • SIH 2024–27
+        <div style={{ whiteSpace: 'nowrap', opacity: 0.7, fontWeight: 600 }}>
+          GovVerify Platform • AICTE Statutory Compliance
         </div>
       </footer>
 

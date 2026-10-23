@@ -1,5 +1,5 @@
-import React from 'react';
-import { FastForward, RotateCcw, AlertOctagon, Sparkles, Clock, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { FastForward, RotateCcw, AlertOctagon, Clock, CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
 
 export function SimulationBar({ 
   simDaysOffset, 
@@ -8,78 +8,101 @@ export function SimulationBar({
   onTriggerTestEscalation,
   lastActionMessage 
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
-    <div className="simulation-bar">
-      <div className="sim-info">
-        <span className="sim-label">
-          <Clock size={15} /> Real-Time Workflow & SLA Engine Simulator
+    <div className="sim-hud-pill" id="simulation-hud">
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)} 
+        style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+        title="Toggle simulation time-travel controls"
+      >
+        <Clock size={14} color="#0f172a" />
+        <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+          Sim Time {simDaysOffset > 0 ? `(+${simDaysOffset}d)` : '(Day 0)'}
         </span>
-        <span style={{ color: '#94a3b8', fontSize: '0.78rem' }}>
-          Evaluate automated timeline monitoring, deadline alerts, and hierarchical escalations by advancing simulated time:
+        <span style={{ 
+          color: 'var(--text-muted)', 
+          fontSize: '0.68rem',
+          background: '#f1f5f9',
+          border: '1px solid #e2e8f0',
+          padding: '1px 6px',
+          borderRadius: '2px',
+          fontWeight: 600
+        }}>
+          {isExpanded ? 'Hide' : 'Time Travel'}
         </span>
-        {lastActionMessage && (
-          <span style={{ 
-            color: '#34d399', 
-            background: 'rgba(16, 185, 129, 0.12)', 
-            padding: '2px 8px', 
-            borderRadius: '4px',
-            fontSize: '0.74rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}>
-            <CheckCircle2 size={12} /> {lastActionMessage}
-          </span>
-        )}
       </div>
 
-      <div className="sim-controls">
-        <button 
-          className="btn-sim"
-          onClick={() => onAdvanceDays(1)}
-          title="Advance system clock by 1 day to trigger daily SLA checks"
-          id="btn-advance-1d"
-        >
-          <FastForward size={13} /> +1 Day
-        </button>
-        <button 
-          className="btn-sim"
-          onClick={() => onAdvanceDays(3)}
-          title="Advance by 3 days to test Level 1 escalation triggers"
-          id="btn-advance-3d"
-        >
-          <FastForward size={13} /> +3 Days
-        </button>
-        <button 
-          className="btn-sim"
-          onClick={() => onAdvanceDays(7)}
-          title="Advance by 7 days to test Level 2 and Level 3 escalations"
-          id="btn-advance-7d"
-        >
-          <FastForward size={13} /> +7 Days (Weekly Review)
-        </button>
-
-        <button 
-          className="btn-sim btn-sim-primary"
-          onClick={onTriggerTestEscalation}
-          title="Directly trigger an urgent SLA breach escalation event"
-          id="btn-instant-escalation-test"
-        >
-          <AlertOctagon size={13} /> Test Automated Breach Escalation
-        </button>
-
-        {simDaysOffset > 0 && (
+      {isExpanded && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', borderLeft: '1px solid var(--border-medium)', paddingLeft: '10px' }}>
           <button 
-            className="btn-sim"
-            onClick={onResetTime}
-            style={{ color: '#f87171' }}
-            title="Reset system clock back to Day 0"
-            id="btn-reset-time"
+            className="sim-btn-pill"
+            onClick={() => onAdvanceDays(1)}
+            title="Advance +1 day"
+            id="btn-advance-1d"
           >
-            <RotateCcw size={13} /> Reset Date
+            +1d
           </button>
-        )}
-      </div>
+          <button 
+            className="sim-btn-pill"
+            onClick={() => onAdvanceDays(3)}
+            title="Advance +3 days"
+            id="btn-advance-3d"
+          >
+            +3d
+          </button>
+          <button 
+            className="sim-btn-pill"
+            onClick={() => onAdvanceDays(7)}
+            title="Advance +7 days"
+            id="btn-advance-7d"
+          >
+            +7d
+          </button>
+
+          <button 
+            className="sim-btn-pill"
+            onClick={onTriggerTestEscalation}
+            style={{ color: '#b45309', borderColor: '#fde68a' }}
+            title="Trigger test breach escalation"
+            id="btn-instant-escalation-test"
+          >
+            <AlertOctagon size={11} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-1px' }} />
+            Breach
+          </button>
+
+          {simDaysOffset > 0 && (
+            <button 
+              className="sim-btn-pill"
+              onClick={onResetTime}
+              style={{ color: 'var(--ruby-600)' }}
+              title="Reset date"
+              id="btn-reset-time"
+            >
+              <RotateCcw size={11} style={{ display: 'inline', marginRight: '3px', verticalAlign: '-1px' }} />
+              Reset
+            </button>
+          )}
+        </div>
+      )}
+
+      {lastActionMessage && (
+        <span style={{ 
+          color: '#065f46', 
+          background: '#ecfdf5', 
+          border: '1px solid #a7f3d0',
+          padding: '2px 8px', 
+          borderRadius: '2px',
+          fontSize: '0.7rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          fontWeight: 600
+        }}>
+          <CheckCircle2 size={11} /> {lastActionMessage}
+        </span>
+      )}
     </div>
   );
 }

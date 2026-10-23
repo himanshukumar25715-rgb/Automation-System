@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { 
-  Layers, 
-  AlertTriangle, 
-  Clock, 
-  CheckCircle2, 
-  MapPin, 
   FileText, 
-  TrendingUp, 
-  Users, 
-  ArrowRight,
-  ShieldAlert,
-  Flame,
+  ShieldCheck, 
+  AlertTriangle, 
+  AlertCircle, 
+  ArrowRight, 
+  Search, 
   Calendar,
-  Search
+  Clock,
+  Layers,
+  MapPin,
+  ExternalLink,
+  Plus
 } from 'lucide-react';
 import { AICTE_REGIONS } from '../data/mockData';
 
@@ -36,16 +35,10 @@ export function PendencyDashboard({
     return matchesRegion && matchesSearch;
   });
 
-  const totalActive = applications.length;
-  const underScrutiny = applications.filter(a => a.currentStage === 'Preliminary Scrutiny').length;
-  const underEvc = applications.filter(a => a.currentStage.includes('EVC')).length;
-  const underSac = applications.filter(a => a.currentStage.includes('SAC')).length;
-  const overdueCases = applications.filter(a => a.status === 'Overdue' || a.status === 'Critical Alert' || a.daysInCurrentStage > a.slaDays);
-  const approvedCases = applications.filter(a => a.currentStage === 'Council Approval');
-
-  // Documents & Undertakings KPI
-  const criticalDocs = leaseDocs.filter(d => d.daysRemaining <= 90);
-  const pendingUndertakings = undertakings.filter(u => u.status !== 'Verified & Closed');
+  const totalCount = applications.length;
+  const passedCount = applications.filter(a => a.currentStage === 'Council Approval' || a.currentStage === 'SAC / SHC Hearing').length;
+  const reviewCount = applications.filter(a => a.currentStage === 'Preliminary Scrutiny' || a.currentStage.includes('EVC')).length;
+  const overdueCount = applications.filter(a => a.status === 'Overdue' || a.status === 'Critical Alert' || a.daysInCurrentStage > a.slaDays).length;
 
   // Region stats
   const regionStats = AICTE_REGIONS.map(reg => {
@@ -73,333 +66,151 @@ export function PendencyDashboard({
 
   return (
     <div className="pendency-dashboard">
-      {/* Top Banner with Role-Specific Overview */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
-        border: '1px solid var(--border-medium)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '18px 24px',
-        marginBottom: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      {/* 1. Page Header (Inspired by the Clean Modern Screenshot) */}
+      <div className="page-header-row">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span className="badge badge-info">{currentRole.badge}</span>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Logged in as: <strong>{currentRole.officer}</strong> ({currentRole.designation})</span>
+          <div className="page-overline">
+            OVERVIEW
           </div>
-          <h2 style={{ fontSize: '1.4rem', marginTop: '6px' }}>
-            National APH Approval Pendency & Workflow Monitor
-          </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
-            Centralized tracking of application stages, SLA compliance, inspection scheduling, and institutional undertakings across all 8 AICTE Regions.
+          <h1 className="page-title">
+            Dashboard
+          </h1>
+          <p className="page-subtitle">
+            AICTE Approval Workflows • {currentRole?.badge} ({currentRole?.officer})
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button 
-            className="btn btn-secondary btn-sm"
-            onClick={() => onNavigateTab('workflows')}
-          >
-            <FileText size={15} /> View All Applications ({totalActive})
-          </button>
-          <button 
-            className="btn btn-primary btn-sm"
+            className="btn-dark"
             onClick={() => onNavigateTab('evc')}
           >
-            <Calendar size={15} /> EVC Inspection Hub
+            <Calendar size={15} />
+            <span>EVC Schedule</span>
+          </button>
+          
+          <button 
+            className="btn-mint"
+            onClick={() => onNavigateTab('applications')}
+            id="btn-new-verification-dashboard"
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            <span>Workflow Queue</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Active Applications</span>
-            <div className="kpi-icon-wrap" style={{ color: '#38bdf8' }}>
-              <FileText size={18} />
-            </div>
+      {/* 2. 4-Card Metric Grid (Directly matching the 4 KPI cards from the reference image) */}
+      <div className="metric-grid">
+        {/* Metric 1: Total Documents / Applications */}
+        <div className="metric-card">
+          <div className="metric-card-left">
+            <span className="metric-label">TOTAL APPLICATIONS</span>
+            <span className="metric-value">{totalCount}</span>
           </div>
-          <div className="kpi-value">{totalActive}</div>
-          <div className="kpi-subtext">Across 8 Regional Offices</div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Under Scrutiny</span>
-            <div className="kpi-icon-wrap" style={{ color: '#818cf8' }}>
-              <Clock size={18} />
-            </div>
-          </div>
-          <div className="kpi-value">{underScrutiny}</div>
-          <div className="kpi-subtext">Preliminary checklist stage</div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">EVC Scheduled / Active</span>
-            <div className="kpi-icon-wrap" style={{ color: '#c084fc' }}>
-              <Users size={18} />
-            </div>
-          </div>
-          <div className="kpi-value">{underEvc}</div>
-          <div className="kpi-subtext">Physical / Virtual Inspections</div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">SAC / SHC Appeals</span>
-            <div className="kpi-icon-wrap" style={{ color: '#fb923c' }}>
-              <ShieldAlert size={18} />
-            </div>
-          </div>
-          <div className="kpi-value">{underSac}</div>
-          <div className="kpi-subtext">Standing Appellate Committee</div>
-        </div>
-
-        <div className="kpi-card alert-ruby">
-          <div className="kpi-header">
-            <span className="kpi-title" style={{ color: '#f87171' }}>SLA Overdue Breaches</span>
-            <div className="kpi-icon-wrap" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.15)' }}>
-              <Flame size={18} />
-            </div>
-          </div>
-          <div className="kpi-value" style={{ color: '#f87171' }}>{overdueCases.length}</div>
-          <div className="kpi-subtext" style={{ color: '#fca5a5' }}>
-            Auto-escalated to RO / Bureau
+          <div className="metric-icon-wrap" style={{ color: 'var(--text-muted)' }}>
+            <FileText size={32} strokeWidth={1.8} />
           </div>
         </div>
 
-        <div className="kpi-card alert-amber">
-          <div className="kpi-header">
-            <span className="kpi-title" style={{ color: '#fbbf24' }}>Critical Lease Expiry</span>
-            <div className="kpi-icon-wrap" style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)' }}>
-              <AlertTriangle size={18} />
-            </div>
+        {/* Metric 2: Auto-Passed / Compliant */}
+        <div className="metric-card">
+          <div className="metric-card-left">
+            <span className="metric-label">AUTO-PASSED / COMPLIANT</span>
+            <span className="metric-value">{passedCount}</span>
           </div>
-          <div className="kpi-value" style={{ color: '#fbbf24' }}>{criticalDocs.length}</div>
-          <div className="kpi-subtext" style={{ color: '#fde68a' }}>
-            &le;90 days validity remaining
+          <div className="metric-icon-wrap" style={{ color: 'var(--mint-500)' }}>
+            <ShieldCheck size={32} strokeWidth={1.8} />
           </div>
         </div>
 
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Pending Undertakings</span>
-            <div className="kpi-icon-wrap" style={{ color: '#34d399' }}>
-              <CheckCircle2 size={18} />
-            </div>
+        {/* Metric 3: Needs Review */}
+        <div className="metric-card">
+          <div className="metric-card-left">
+            <span className="metric-label">NEEDS REVIEW / SCRUTINY</span>
+            <span className="metric-value">{reviewCount}</span>
           </div>
-          <div className="kpi-value">{pendingUndertakings.length}</div>
-          <div className="kpi-subtext">Time-bound conditions tracked</div>
-        </div>
-      </div>
-
-      {/* Grid: Regional Pendency Matrix & Stage Funnel */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '24px' }}>
-        {/* Regional Matrix */}
-        <div className="panel" style={{ margin: 0 }}>
-          <div className="panel-header">
-            <div>
-              <h3 className="panel-title">
-                <MapPin size={20} color="#38bdf8" /> AICTE Region-Wise Pendency & Workload Matrix
-              </h3>
-              <p style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
-                Real-time bottleneck identification across the 8 AICTE Regional Offices (Click a region to filter applications)
-              </p>
-            </div>
-            {selectedRegionFilter !== 'ALL' && (
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => setSelectedRegionFilter('ALL')}
-              >
-                Clear Region Filter ({selectedRegionFilter})
-              </button>
-            )}
-          </div>
-
-          <div className="table-responsive">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Region</th>
-                  <th>Headquarters</th>
-                  <th>Active Cases</th>
-                  <th>Avg Aging</th>
-                  <th>SLA Overdue</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {regionStats.map(reg => {
-                  const isSelected = selectedRegionFilter === reg.code;
-                  return (
-                    <tr 
-                      key={reg.code} 
-                      style={{ 
-                        cursor: 'pointer',
-                        background: isSelected ? 'rgba(56, 189, 248, 0.08)' : undefined 
-                      }}
-                      onClick={() => setSelectedRegionFilter(isSelected ? 'ALL' : reg.code)}
-                    >
-                      <td>
-                        <strong>{reg.code}</strong>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{reg.name}</div>
-                      </td>
-                      <td>{reg.hq}</td>
-                      <td>
-                        <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{reg.count}</span>
-                      </td>
-                      <td>
-                        <span style={{ color: reg.avgDays > 7 ? '#f87171' : '#cbd5e1' }}>
-                          {reg.avgDays} days
-                        </span>
-                      </td>
-                      <td>
-                        {reg.overdue > 0 ? (
-                          <span className="badge badge-critical">
-                            <Flame size={12} /> {reg.overdue} Breached
-                          </span>
-                        ) : (
-                          <span className="badge badge-success">0 Overdue</span>
-                        )}
-                      </td>
-                      <td>
-                        <span className={`badge ${
-                          reg.bottleneck === 'High Bottleneck' ? 'badge-critical' :
-                          reg.bottleneck === 'Moderate Load' ? 'badge-warning' : 'badge-info'
-                        }`}>
-                          {reg.bottleneck}
-                        </span>
-                      </td>
-                      <td>
-                        <span style={{ color: '#38bdf8', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          Filter <ArrowRight size={13} />
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="metric-icon-wrap" style={{ color: 'var(--amber-400)' }}>
+            <AlertTriangle size={32} strokeWidth={1.8} />
           </div>
         </div>
 
-        {/* Stage Funnel / Health Summary */}
-        <div className="panel" style={{ margin: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <TrendingUp size={20} color="#34d399" /> Processing Stage Funnel
-              </h3>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '10px' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                  <span>Preliminary Scrutiny</span>
-                  <span style={{ fontWeight: 700 }}>{underScrutiny} cases ({((underScrutiny/totalActive)*100).toFixed(0)}%)</span>
-                </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '999px', overflow: 'hidden' }}>
-                  <div style={{ width: `${(underScrutiny/totalActive)*100}%`, height: '100%', background: '#38bdf8' }} />
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                  <span>EVC Inspection Stage</span>
-                  <span style={{ fontWeight: 700 }}>{underEvc} cases ({((underEvc/totalActive)*100).toFixed(0)}%)</span>
-                </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '999px', overflow: 'hidden' }}>
-                  <div style={{ width: `${(underEvc/totalActive)*100}%`, height: '100%', background: '#c084fc' }} />
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                  <span>SAC / SHC Hearing</span>
-                  <span style={{ fontWeight: 700 }}>{underSac} cases ({((underSac/totalActive)*100).toFixed(0)}%)</span>
-                </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '999px', overflow: 'hidden' }}>
-                  <div style={{ width: `${(underSac/totalActive)*100}%`, height: '100%', background: '#fb923c' }} />
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                  <span>Council Approval / Final Orders</span>
-                  <span style={{ fontWeight: 700 }}>{approvedCases.length} cases ({((approvedCases.length/totalActive)*100).toFixed(0)}%)</span>
-                </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '999px', overflow: 'hidden' }}>
-                  <div style={{ width: `${(approvedCases.length/totalActive)*100}%`, height: '100%', background: '#10b981' }} />
-                </div>
-              </div>
-            </div>
+        {/* Metric 4: Failed / SLA Overdue */}
+        <div className="metric-card">
+          <div className="metric-card-left">
+            <span className="metric-label">FAILED / SLA OVERDUE</span>
+            <span className="metric-value">{overdueCount}</span>
           </div>
-
-          {/* Quick Regulatory Safeguard note */}
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.8)',
-            border: '1px solid rgba(245, 158, 11, 0.25)',
-            borderRadius: '8px',
-            padding: '12px',
-            marginTop: '20px',
-            fontSize: '0.74rem',
-            color: '#94a3b8'
-          }}>
-            <div style={{ fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
-              <ShieldAlert size={14} /> AICTE Regulatory Safeguard
-            </div>
-            Workflows and alerts support statutory processing under the Approval Process Handbook. Final regulatory sanctions are reserved for the Competent Council.
+          <div className="metric-icon-wrap" style={{ color: 'var(--ruby-500)' }}>
+            <AlertCircle size={32} strokeWidth={1.8} />
           </div>
         </div>
       </div>
 
-      {/* Priority Action Watchlist Table */}
-      <div className="panel">
-        <div className="panel-header">
-          <div>
-            <h3 className="panel-title">
-              <Flame size={20} color="#ef4444" /> Urgent Action & Overdue SLA Watchlist
-            </h3>
-            <p style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
-              Cases currently requiring immediate officer intervention or automated Level 1/2/3 escalation
-            </p>
-          </div>
+      {/* 3. Section Header: RECENT APPLICATIONS & View all -> */}
+      <div className="section-header-clean">
+        <span className="section-label">RECENT APPLICATIONS</span>
+        <button 
+          className="section-link"
+          onClick={() => onNavigateTab('applications')}
+          id="btn-view-all-apps"
+        >
+          <span>View all</span>
+          <ArrowRight size={14} />
+        </button>
+      </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <div style={{ position: 'relative', width: '260px' }}>
-              <Search size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
-              <input
-                type="text"
-                placeholder="Search institute or ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="form-input"
-                style={{ paddingLeft: '34px', fontSize: '0.78rem' }}
-              />
-            </div>
-          </div>
+      {/* 4. Filter Bar */}
+      <div className="filter-bar-clean">
+        <div className="search-input-wrap">
+          <Search size={15} />
+          <input
+            type="text"
+            className="search-input-clean"
+            placeholder="Search by institute name, application ID, or city..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        <div className="table-responsive">
-          <table className="custom-table">
+        <select 
+          className="select-clean"
+          value={selectedRegionFilter}
+          onChange={(e) => setSelectedRegionFilter(e.target.value)}
+        >
+          <option value="ALL">All Regions (8 Offices)</option>
+          {AICTE_REGIONS.map(r => (
+            <option key={r.code} value={r.code}>{r.code} - {r.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* 5. Recent Applications Table */}
+      {filteredApps.length === 0 ? (
+        <div className="empty-state-box">
+          <FileText size={36} color="var(--text-dim)" />
+          <p className="empty-state-text">
+            No applications match your filter criteria. Try resetting the search or selecting another region.
+          </p>
+          <button 
+            className="btn-dark"
+            onClick={() => { setSearchTerm(''); setSelectedRegionFilter('ALL'); }}
+          >
+            Clear Filters
+          </button>
+        </div>
+      ) : (
+        <div className="table-wrap-clean" style={{ marginBottom: '32px' }}>
+          <table className="table-clean">
             <thead>
               <tr>
                 <th>Application ID</th>
-                <th>Institution Details</th>
+                <th>Institution</th>
                 <th>Region</th>
-                <th>Current Stage</th>
-                <th>Time in Stage</th>
-                <th>SLA Limit</th>
-                <th>Escalation Level</th>
-                <th>Responsible Officer</th>
-                <th>Action</th>
+                <th>Stage</th>
+                <th>Days / SLA</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -408,46 +219,54 @@ export function PendencyDashboard({
                 return (
                   <tr key={app.id}>
                     <td>
-                      <span style={{ fontWeight: 700, fontFamily: 'var(--font-display)', color: '#38bdf8' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-sans)' }}>
                         {app.id}
                       </span>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Applied: {app.appliedDate}</div>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{app.instituteName}</div>
-                      <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>{app.city}, {app.state} • {app.type}</div>
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{app.instituteName}</div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)' }}>
+                          {app.city}, {app.state} • {app.type}
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <span className="badge badge-info">{app.region}</span>
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 600, color: '#e2e8f0' }}>{app.currentStage}</span>
-                    </td>
-                    <td>
-                      <span className={`sla-pill ${isOverdue ? 'sla-breached' : 'sla-normal'}`}>
-                        <Clock size={12} /> {app.daysInCurrentStage} Days
+                      <span className="status-pill purple">
+                        {app.region}
                       </span>
                     </td>
-                    <td>{app.slaDays} Days</td>
                     <td>
-                      {app.escalationLevel === 3 ? (
-                        <span className="badge badge-critical">Level 3 (Member Secy)</span>
-                      ) : app.escalationLevel === 2 ? (
-                        <span className="badge badge-critical">Level 2 (Bureau Head)</span>
-                      ) : app.escalationLevel === 1 ? (
-                        <span className="badge badge-warning">Level 1 (Regional Officer)</span>
-                      ) : (
-                        <span className="badge badge-success">Normal SLA</span>
-                      )}
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                        {app.currentStage}
+                      </span>
                     </td>
-                    <td style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{app.assignedOfficer}</td>
                     <td>
+                      <span style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        color: isOverdue ? 'var(--ruby-600)' : 'var(--emerald-600)'
+                      }}>
+                        {app.daysInCurrentStage}d / {app.slaDays}d
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`status-pill ${
+                        app.status === 'Approved' ? 'mint' :
+                        app.status === 'Overdue' || app.status === 'Critical Alert' ? 'ruby' :
+                        app.status.includes('Deficiency') ? 'amber' : 'cyan'
+                      }`}>
+                        {app.status}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
                       <button
-                        className="btn btn-secondary btn-sm"
+                        className="btn-dark"
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', borderRadius: '2px' }}
                         onClick={() => onSelectApplication(app)}
-                        id={`btn-open-case-${app.id}`}
                       >
-                        Inspect Case
+                        <span>Inspect</span>
+                        <ArrowRight size={13} />
                       </button>
                     </td>
                   </tr>
@@ -456,6 +275,55 @@ export function PendencyDashboard({
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* 6. Regional Jurisdictions Performance Grid */}
+      <div className="section-header-clean">
+        <span className="section-label">REGIONAL PERFORMANCE STATUS (8 OFFICES)</span>
+        <button 
+          className="section-link"
+          onClick={() => onNavigateTab('region_reports')}
+        >
+          <span>Detailed reports</span>
+          <ArrowRight size={14} />
+        </button>
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+        gap: '14px',
+        marginBottom: '20px'
+      }}>
+        {regionStats.map(reg => (
+          <div 
+            key={reg.code}
+            className="panel-clean"
+            style={{ padding: '16px 18px', cursor: 'pointer', borderRadius: '2px' }}
+            onClick={() => { setSelectedRegionFilter(reg.code); }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.92rem' }}>
+                {reg.code} ({reg.hq})
+              </span>
+              <span className={`status-pill ${
+                reg.bottleneck === 'Optimal' ? 'mint' :
+                reg.bottleneck === 'Moderate Load' ? 'amber' : 'ruby'
+              }`}>
+                {reg.bottleneck}
+              </span>
+            </div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginBottom: '8px' }}>
+              {reg.name}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Active Cases: <strong style={{ color: 'var(--text-main)' }}>{reg.count}</strong></span>
+              <span style={{ color: reg.overdue > 0 ? 'var(--ruby-600)' : 'var(--text-dim)' }}>
+                Overdue: <strong>{reg.overdue}</strong>
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

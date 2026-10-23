@@ -1,4 +1,4 @@
-// AICTE PRAGATI-NAV Backend Server
+// GovVerify Backend Server
 import express from 'express';
 import cors from 'cors';
 import { PORT } from './src/config/constants.js';
@@ -32,7 +32,7 @@ app.use(requestLogger);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ONLINE',
-    system: 'AICTE PRAGATI-NAV (APH-Flow 360) REST API',
+    system: 'GovVerify (AICTE Automation Platform) REST API',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime())
@@ -64,7 +64,7 @@ app.use(errorHandler);
 // Start Server
 app.listen(PORT, () => {
   console.log(`========================================================`);
-  console.log(` AICTE PRAGATI-NAV REST API Server Running`);
+  console.log(` GovVerify REST API Server Running`);
   console.log(` Port:    http://localhost:${PORT}`);
   console.log(` Health:  http://localhost:${PORT}/api/health`);
   console.log(` Docs:    http://localhost:${PORT}/api/reports/pdf`);

@@ -61,128 +61,106 @@ export function LeaseValidityRadar({
 
   return (
     <div className="lease-validity-radar">
-      {/* Top Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
-        border: '1px solid var(--border-medium)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '18px 24px',
-        marginBottom: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge badge-warning">
-              <FileCheck size={13} /> Land Lease & Mandatory Document Validity Radar
-            </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              APH 2024–27 Chapter I & Appendix 4 Norms
-            </span>
-          </div>
-          <h2 style={{ fontSize: '1.35rem', marginTop: '6px' }}>
-            Document Expiry Monitoring & Advance Renewal Alert Engine
-          </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
-            Continuous tracking of 30-year registered land lease deeds, building safety certificates, and fire NOCs with automated advance notices at 180 and 90 days.
+          <div className="page-overline">REGULATORY COMPLIANCE RADAR</div>
+          <h1 className="page-title">Document Validity & Leases</h1>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '6px 0 0 0' }}>
+            Continuous tracking of registered land deeds, fire NOCs, and building safety certificates.
           </p>
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
-          <div className="sla-pill sla-breached">
-            <ShieldAlert size={14} /> Expired/Non-Renewed Blocks Next EoA
+          <div className="status-pill status-danger" style={{ padding: '6px 12px', fontSize: '0.78rem' }}>
+            <ShieldAlert size={13} /> Expired Deeds Block EoA
           </div>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="kpi-grid">
-        <div className="kpi-card alert-ruby">
-          <div className="kpi-header">
-            <span className="kpi-title" style={{ color: '#f87171' }}>Critical (&le;90 Days)</span>
-            <div className="kpi-icon-wrap" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.15)' }}>
-              <Flame size={18} />
+      <div className="metric-grid" style={{ marginBottom: '28px' }}>
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Critical (≤90 Days)</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--coral-500)' }}>
+              <Flame size={20} />
             </div>
           </div>
-          <div className="kpi-value" style={{ color: '#f87171' }}>{criticalCount}</div>
-          <div className="kpi-subtext" style={{ color: '#fca5a5' }}>
-            Immediate show-cause warning sent
-          </div>
+          <div className="metric-value" style={{ color: 'var(--coral-500)' }}>{criticalCount}</div>
         </div>
 
-        <div className="kpi-card alert-amber">
-          <div className="kpi-header">
-            <span className="kpi-title" style={{ color: '#fbbf24' }}>Advance Notice (90-180 Days)</span>
-            <div className="kpi-icon-wrap" style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)' }}>
-              <Clock size={18} />
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Advance Notice (90-180d)</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--amber-500)' }}>
+              <Clock size={20} />
             </div>
           </div>
-          <div className="kpi-value" style={{ color: '#fbbf24' }}>{advanceCount}</div>
-          <div className="kpi-subtext" style={{ color: '#fde68a' }}>
-            6-Month advance renewal reminder
-          </div>
+          <div className="metric-value" style={{ color: 'var(--amber-500)' }}>{advanceCount}</div>
         </div>
 
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Active & Valid (&gt;180 Days)</span>
-            <div className="kpi-icon-wrap" style={{ color: '#34d399' }}>
-              <CheckCircle2 size={18} />
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Active & Valid (&gt;180d)</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--mint-500)' }}>
+              <CheckCircle2 size={20} />
             </div>
           </div>
-          <div className="kpi-value">{validCount}</div>
-          <div className="kpi-subtext">Compliant registered deeds</div>
+          <div className="metric-value">{validCount}</div>
         </div>
       </div>
 
       {/* Document Ledger Panel */}
-      <div className="panel">
-        <div className="panel-header">
+      <div style={{ marginBottom: '28px' }}>
+        <div className="section-header-clean">
           <div>
-            <h3 className="panel-title">
-              <FileCheck size={20} color="#38bdf8" /> Master Institutional Land & Statutory Document Register
+            <div className="page-overline">DOCUMENT REGISTRY</div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              Land & Statutory Document Register
             </h3>
-            <p style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
-              Real-time validity status, registered document numbers, and automated regulatory safeguard actions
-            </p>
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
-            <div style={{ position: 'relative', width: '240px' }}>
-              <Search size={15} style={{ position: 'absolute', left: '10px', top: '11px', color: '#64748b' }} />
+            <div style={{ position: 'relative', width: '220px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-muted)' }} />
               <input
                 type="text"
                 placeholder="Search document / institute..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="form-input"
-                style={{ paddingLeft: '32px', fontSize: '0.78rem' }}
+                className="search-input-clean"
+                style={{ width: '100%', fontSize: '0.8rem', padding: '6px 10px 6px 30px' }}
               />
             </div>
 
             <select
               value={severityFilter}
               onChange={(e) => setSeverityFilter(e.target.value)}
-              className="form-select"
-              style={{ width: '160px', fontSize: '0.78rem' }}
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-primary)',
+                borderRadius: '2px',
+                padding: '6px 12px',
+                fontSize: '0.8rem',
+                outline: 'none'
+              }}
             >
               <option value="ALL">All Validity Tiers</option>
-              <option value="critical">Critical (&le;90 Days)</option>
+              <option value="critical">Critical (≤90 Days)</option>
               <option value="normal">Safe & Valid</option>
             </select>
           </div>
         </div>
 
-        <div className="table-responsive">
-          <table className="custom-table">
+        <div className="table-wrap-clean">
+          <table className="table-clean">
             <thead>
               <tr>
                 <th>Doc ID & App</th>
                 <th>Institution</th>
-                <th>Document Type & Reg. Number</th>
+                <th>Document Type & Number</th>
                 <th>Registered Date</th>
                 <th>Expiry Date</th>
                 <th>Days Remaining</th>
@@ -196,38 +174,38 @@ export function LeaseValidityRadar({
                 return (
                   <tr key={doc.id}>
                     <td>
-                      <span style={{ fontWeight: 700, color: '#38bdf8' }}>{doc.id}</span>
-                      <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{doc.appId}</div>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{doc.id}</span>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{doc.appId}</div>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{doc.institute}</div>
-                      <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Region: {doc.region}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{doc.institute}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Region: {doc.region}</div>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600, color: '#e2e8f0' }}>{doc.docType}</div>
-                      <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>No: {doc.docNumber}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{doc.docType}</div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>No: {doc.docNumber}</div>
                     </td>
-                    <td>{doc.registeredDate}</td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{doc.registeredDate}</td>
                     <td>
-                      <strong style={{ color: isCritical ? '#f87171' : '#cbd5e1' }}>
+                      <strong style={{ color: isCritical ? 'var(--coral-500)' : 'var(--text-primary)' }}>
                         {doc.expiryDate}
                       </strong>
                     </td>
                     <td>
                       {isCritical ? (
-                        <span className="sla-pill sla-breached">
-                          <Flame size={12} /> {doc.daysRemaining} Days Left
+                        <span className="status-pill status-danger">
+                          <Flame size={12} /> {doc.daysRemaining}d Left
                         </span>
                       ) : (
-                        <span className="sla-pill sla-normal">
-                          <Clock size={12} /> {doc.daysRemaining} Days
+                        <span className="status-pill status-neutral">
+                          <Clock size={12} /> {doc.daysRemaining}d
                         </span>
                       )}
                     </td>
                     <td style={{ maxWidth: '240px' }}>
                       <span style={{ 
-                        fontSize: '0.74rem', 
-                        color: isCritical ? '#fca5a5' : '#94a3b8' 
+                        fontSize: '0.76rem', 
+                        color: isCritical ? 'var(--coral-500)' : 'var(--text-secondary)' 
                       }}>
                         {doc.actionRequired}
                       </span>
@@ -235,20 +213,21 @@ export function LeaseValidityRadar({
                     <td>
                       {can(Permission.UPLOAD_DOCUMENT_RENEWAL) ? (
                         <button
-                          className={`btn btn-sm ${isCritical ? 'btn-warning' : 'btn-secondary'}`}
+                          className={isCritical ? 'btn-mint' : 'btn-dark'}
                           onClick={() => handleOpenRenewal(doc)}
                           id={`btn-renew-doc-${doc.id}`}
+                          style={{ padding: '5px 10px', fontSize: '0.74rem', borderRadius: '2px' }}
                         >
-                          <UploadCloud size={13} /> Upload Renewal
+                          <UploadCloud size={12} /> Upload
                         </button>
                       ) : (
                         <button
-                          className="btn btn-secondary btn-sm"
+                          className="btn-dark"
                           disabled
-                          style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                          style={{ opacity: 0.4, cursor: 'not-allowed', padding: '5px 10px', fontSize: '0.74rem', borderRadius: '2px' }}
                           title={getRestrictionReason(Permission.UPLOAD_DOCUMENT_RENEWAL)}
                         >
-                          <UploadCloud size={13} /> Upload Renewal
+                          <UploadCloud size={12} /> Upload
                         </button>
                       )}
                     </td>
@@ -262,60 +241,99 @@ export function LeaseValidityRadar({
 
       {/* Upload Renewal Modal */}
       {renewalModalDoc && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <UploadCloud size={20} color="#fbbf24" /> Upload Renewed Document & Update Validity
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setRenewalModalDoc(null); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '580px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline">DEED RENEWAL</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  Upload Renewed Document
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setRenewalModalDoc(null)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleSubmitRenewal}>
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
-                padding: '12px 16px',
-                borderRadius: '8px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                padding: '12px 14px',
+                borderRadius: '2px',
                 marginBottom: '16px',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)'
               }}>
-                <div><strong>Document:</strong> {renewalModalDoc.docType}</div>
-                <div><strong>Institution:</strong> {renewalModalDoc.institute}</div>
-                <div><strong>Current Expiry Date:</strong> {renewalModalDoc.expiryDate} ({renewalModalDoc.daysRemaining} days left)</div>
+                <div><strong>Document:</strong> <span style={{ color: 'var(--text-primary)' }}>{renewalModalDoc.docType}</span></div>
+                <div><strong>Institution:</strong> <span style={{ color: 'var(--text-primary)' }}>{renewalModalDoc.institute}</span></div>
+                <div><strong>Current Expiry:</strong> <span style={{ color: 'var(--text-primary)' }}>{renewalModalDoc.expiryDate} ({renewalModalDoc.daysRemaining} days left)</span></div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">New Registered Deed / Certificate Registration Number:</label>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  New Deed / Registration Number:
+                </label>
                 <input 
                   type="text" 
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={newDocNumber}
                   onChange={(e) => setNewDocNumber(e.target.value)}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">New Validated Expiry Date:</label>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  New Validated Expiry Date:
+                </label>
                 <input 
                   type="date" 
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={newExpiryDate}
                   onChange={(e) => setNewExpiryDate(e.target.value)}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Scanned Certified Copy (PDF):</label>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  Scanned Certified Copy (PDF):
+                </label>
                 <input 
                   type="text" 
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={uploadedProofFile}
                   onChange={(e) => setUploadedProofFile(e.target.value)}
                   required
@@ -323,12 +341,12 @@ export function LeaseValidityRadar({
               </div>
 
               <div style={{
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
+                background: '#f8fafc',
+                border: '1px solid var(--border-subtle)',
                 padding: '10px 14px',
-                borderRadius: '6px',
+                borderRadius: '2px',
                 fontSize: '0.74rem',
-                color: '#cbd5e1',
+                color: 'var(--text-secondary)',
                 marginBottom: '20px'
               }}>
                 Submitting this renewed deed will automatically clear the critical expiry alert, unfreeze the institutional EoA workflow, and record the registration in the immutable audit trail.
@@ -337,16 +355,18 @@ export function LeaseValidityRadar({
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn btn-secondary"
+                  className="btn-dark"
                   onClick={() => setRenewalModalDoc(null)}
+                  style={{ borderRadius: '2px' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-primary"
+                  className="btn-mint"
+                  style={{ borderRadius: '2px' }}
                 >
-                  <CheckCircle2 size={15} /> Save & Validate Renewal
+                  <CheckCircle2 size={14} /> Validate Renewal
                 </button>
               </div>
             </form>

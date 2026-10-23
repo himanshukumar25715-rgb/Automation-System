@@ -33,30 +33,31 @@ export function AphRuleConfigurator({ rules, onUpdateRules, currentRole }) {
     <div className="aph-rule-configurator">
       {/* Top Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
+        background: '#ffffff',
         border: '1px solid var(--border-medium)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: '2px',
         padding: '18px 24px',
         marginBottom: '24px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '16px'
+        gap: '16px',
+        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="badge badge-purple">
               <Sliders size={13} /> APH Dynamic Policy Rule Engine
             </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
               Statutory Parameter Configuration & Threshold Tuning
             </span>
           </div>
-          <h2 style={{ fontSize: '1.35rem', marginTop: '6px' }}>
+          <h2 style={{ fontSize: '1.35rem', marginTop: '6px', color: 'var(--text-main)' }}>
             Configurable APH Timelines, SLAs & Escalation Triggers
           </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
+          <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
             Adjust statutory deadlines and reminder periods in alignment with annual AICTE Approval Process Handbook revisions.
           </p>
         </div>
@@ -70,12 +71,12 @@ export function AphRuleConfigurator({ rules, onUpdateRules, currentRole }) {
 
       {savedSuccess && (
         <div style={{
-          background: 'rgba(16, 185, 129, 0.15)',
-          border: '1px solid rgba(16, 185, 129, 0.4)',
-          borderRadius: '8px',
+          background: '#ecfdf5',
+          border: '1px solid #a7f3d0',
+          borderRadius: '2px',
           padding: '12px 20px',
           marginBottom: '20px',
-          color: '#34d399',
+          color: '#065f46',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',

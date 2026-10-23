@@ -1,4 +1,4 @@
-# AICTE PRAGATI-NAV (APH-Flow 360)
+# GovVerify
 ### Unified Digital Platform for AICTE Approval Automation, Compliance & Document Validity Monitoring
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -10,7 +10,7 @@
 
 ## 📌 Executive Overview
 
-**AICTE PRAGATI-NAV** is an integrated, secure, and configurable regulatory governance platform designed to automate and monitor technical education approval workflows under the **AICTE Approval Process Handbook (APH) 2024–27**.
+**GovVerify** is an integrated, secure, and configurable regulatory governance platform designed to automate and monitor technical education approval workflows under the **AICTE Approval Process Handbook (APH) 2024–27**.
 
 The platform resolves fragmented manual coordination across 8 AICTE Regional Offices by implementing automated stage transitions, 3-expert committee scheduling, strict time-bound undertaking tracking, 30-year registered land lease countdowns, and a 3-tier escalation ladder.
 

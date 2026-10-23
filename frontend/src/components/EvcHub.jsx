@@ -85,78 +85,101 @@ export function EvcHub({
 
   return (
     <div className="evc-hub">
-      {/* Top Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
-        border: '1px solid var(--border-medium)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '18px 24px',
-        marginBottom: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge badge-purple">
-              <Users size={13} /> EVC Committee Management System
-            </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              APH 2024–27 Chapter III (Physical & Hybrid Inspections)
-            </span>
-          </div>
-          <h2 style={{ fontSize: '1.35rem', marginTop: '6px' }}>
-            Expert Visit Committee (EVC) Scheduling, Panel Allocation & Reports
-          </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
-            Automated queuing of scrutiny-cleared applications, conflict-of-interest checks, 48-hour report upload countdowns, and delay escalations.
+          <div className="page-overline">INSPECTION HUB & COMMITTEE MANAGEMENT</div>
+          <h1 className="page-title">EVC Scheduling & Panel Allocation</h1>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '6px 0 0 0' }}>
+            Automated queuing of scrutiny-cleared applications, conflict-of-interest checks, and 48-hour digital report countdowns.
           </p>
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-          <div className="sla-pill sla-warning">
-            <Clock size={14} /> EVC Scheduling SLA: 5 Days
+          <div className="status-pill status-warning" style={{ padding: '6px 12px', fontSize: '0.78rem' }}>
+            <Clock size={13} /> Scheduling SLA: 5 Days
           </div>
-          <div className="sla-pill sla-normal">
-            <Clock size={14} /> Report Submission: 48 Hours
+          <div className="status-pill status-compliant" style={{ padding: '6px 12px', fontSize: '0.78rem' }}>
+            <Clock size={13} /> Report Window: 48 Hours
           </div>
         </div>
       </div>
 
+      {/* 4 KPI Cards */}
+      <div className="metric-grid" style={{ marginBottom: '28px' }}>
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Awaiting Scheduling</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--amber-500)' }}>
+              <Clock size={20} />
+            </div>
+          </div>
+          <div className="metric-value">{evcPendingScheduling.length}</div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Active / Scheduled</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--mint-500)' }}>
+              <Calendar size={20} />
+            </div>
+          </div>
+          <div className="metric-value">{evcScheduledAndActive.length}</div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Completed & Signed</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--mint-500)' }}>
+              <CheckCircle2 size={20} />
+            </div>
+          </div>
+          <div className="metric-value">{evcCompleted.length}</div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Certified Experts</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--sky-400)' }}>
+              <Users size={20} />
+            </div>
+          </div>
+          <div className="metric-value">{INITIAL_EXPERTS_POOL.length}</div>
+        </div>
+      </div>
+
       {/* Grid: Pending Scheduling Queue & Active Visits */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '20px', marginBottom: '28px' }}>
         
         {/* Section 1: EVC Pending Scheduling Queue */}
-        <div className="panel" style={{ margin: 0 }}>
-          <div className="panel-header">
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '2px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h3 className="panel-title" style={{ color: '#fbbf24' }}>
-                <Clock size={18} /> Queue: Awaiting EVC Scheduling ({evcPendingScheduling.length})
-              </h3>
-              <p style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                Applications cleared from preliminary scrutiny needing expert panel allocation
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Clock size={16} style={{ color: 'var(--amber-500)' }} /> Awaiting Panel Allocation ({evcPendingScheduling.length})
+              </div>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                Scrutiny-cleared applications awaiting committee dispatch
               </p>
             </div>
           </div>
 
           {evcPendingScheduling.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 16px', color: '#94a3b8' }}>
-              <CheckCircle2 size={36} color="#10b981" style={{ margin: '0 auto 8px auto' }} />
-              <div>All cleared applications have been scheduled!</div>
+            <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
+              <CheckCircle2 size={32} style={{ color: 'var(--emerald-600)', margin: '0 auto 8px auto' }} />
+              <div style={{ fontSize: '0.85rem' }}>All cleared applications have been scheduled!</div>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {evcPendingScheduling.map(app => {
                 const isOverdue = app.daysInCurrentStage > app.slaDays;
                 return (
                   <div 
                     key={app.id}
                     style={{
-                      background: 'rgba(15, 23, 42, 0.7)',
-                      border: `1px solid ${isOverdue ? 'rgba(239, 68, 68, 0.5)' : 'var(--border-subtle)'}`,
-                      borderRadius: '8px',
+                      background: 'var(--bg-elevated)',
+                      border: `1px solid ${isOverdue ? 'rgba(255, 77, 106, 0.4)' : 'var(--border-subtle)'}`,
+                      borderRadius: '2px',
                       padding: '14px',
                       display: 'flex',
                       flexDirection: 'column',
@@ -164,30 +187,32 @@ export function EvcHub({
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, color: '#38bdf8' }}>{app.id}</span>
-                      <span className={`sla-pill ${isOverdue ? 'sla-breached' : 'sla-normal'}`}>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.88rem' }}>{app.id}</span>
+                      <span className={`status-pill ${isOverdue ? 'status-danger' : 'status-neutral'}`}>
                         {app.daysInCurrentStage} / 5 Days
                       </span>
                     </div>
 
-                    <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{app.instituteName}</div>
-                    <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{app.instituteName}</div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                       {app.city}, {app.region} • {app.type}
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
                       <button 
-                        className="btn btn-secondary btn-sm"
+                        className="btn-dark"
                         onClick={() => onOpenApplicationDossier(app)}
+                        style={{ padding: '6px 12px', fontSize: '0.76rem', borderRadius: '2px' }}
                       >
-                        Inspect Scrutiny Dossier
+                        Inspect Dossier
                       </button>
                       <button 
-                        className="btn btn-primary btn-sm"
+                        className="btn-mint"
                         onClick={() => handleOpenScheduleModal(app)}
                         id={`btn-schedule-evc-${app.id}`}
+                        style={{ padding: '6px 12px', fontSize: '0.76rem', borderRadius: '2px' }}
                       >
-                        <Calendar size={14} /> Schedule Panel & Date
+                        <Calendar size={13} /> Schedule Panel
                       </button>
                     </div>
                   </div>
@@ -198,34 +223,34 @@ export function EvcHub({
         </div>
 
         {/* Section 2: Active Scheduled Visits & Countdown */}
-        <div className="panel" style={{ margin: 0 }}>
-          <div className="panel-header">
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '2px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h3 className="panel-title" style={{ color: '#38bdf8' }}>
-                <Calendar size={18} /> Active Scheduled Visits & Report Queue ({evcScheduledAndActive.length})
-              </h3>
-              <p style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                Inspection committees assigned; awaiting physical/hybrid verification and digital report upload
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={16} style={{ color: 'var(--emerald-600)' }} /> Active Visits & Report Queue ({evcScheduledAndActive.length})
+              </div>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                Committees active; awaiting digital report submission
               </p>
             </div>
           </div>
 
           {evcScheduledAndActive.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 16px', color: '#94a3b8' }}>
-              <Clock size={36} color="#64748b" style={{ margin: '0 auto 8px auto' }} />
-              <div>No pending inspection visits at this moment</div>
+            <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
+              <Clock size={32} style={{ margin: '0 auto 8px auto', opacity: 0.5 }} />
+              <div style={{ fontSize: '0.85rem' }}>No pending inspection visits at this moment</div>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {evcScheduledAndActive.map(app => {
                 const isOverdue = app.daysInCurrentStage > app.slaDays;
                 return (
                   <div 
                     key={app.id}
                     style={{
-                      background: 'rgba(15, 23, 42, 0.7)',
-                      border: `1px solid ${isOverdue ? 'rgba(239, 68, 68, 0.5)' : 'var(--border-subtle)'}`,
-                      borderRadius: '8px',
+                      background: 'var(--bg-elevated)',
+                      border: `1px solid ${isOverdue ? 'rgba(255, 77, 106, 0.4)' : 'var(--border-subtle)'}`,
+                      borderRadius: '2px',
                       padding: '14px',
                       display: 'flex',
                       flexDirection: 'column',
@@ -233,27 +258,28 @@ export function EvcHub({
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, color: '#38bdf8' }}>{app.id}</span>
-                      <span className="badge badge-purple">
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.88rem' }}>{app.id}</span>
+                      <span className="status-pill status-neutral">
                         Visit: {app.evcDetails?.visitDate || 'Scheduled'}
                       </span>
                     </div>
 
-                    <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{app.instituteName}</div>
-                    <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{app.instituteName}</div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                       Committee: <strong>3 Experts Assigned</strong> (Academic + Civil + Observer)
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                      <span style={{ fontSize: '0.72rem', color: isOverdue ? '#f87171' : '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Clock size={12} /> {isOverdue ? 'Report Submission SLA Exceeded!' : 'Report Due within 48h'}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                      <span style={{ fontSize: '0.72rem', color: isOverdue ? 'var(--coral-500)' : 'var(--emerald-600)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Clock size={12} /> {isOverdue ? 'Report SLA Exceeded!' : 'Due within 48h'}
                       </span>
                       <button 
-                        className="btn btn-primary btn-sm"
+                        className="btn-mint"
                         onClick={() => handleOpenReportModal(app)}
                         id={`btn-upload-report-${app.id}`}
+                        style={{ padding: '6px 12px', fontSize: '0.76rem', borderRadius: '2px' }}
                       >
-                        <UploadCloud size={14} /> Upload & Sign Report
+                        <UploadCloud size={13} /> Sign & Submit
                       </button>
                     </div>
                   </div>
@@ -265,20 +291,21 @@ export function EvcHub({
       </div>
 
       {/* Roster of Certified AICTE Experts */}
-      <div className="panel">
-        <div className="panel-header">
+      <div style={{ marginBottom: '28px' }}>
+        <div className="section-header-clean">
           <div>
-            <h3 className="panel-title">
-              <UserCheck size={20} color="#34d399" /> Certified AICTE Expert Evaluator Roster
+            <div className="page-overline">EXPERT EVALUATORS</div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              Certified AICTE Expert Roster
             </h3>
-            <p style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
-              Autonomous pool with automatic Conflict-of-Interest verification against institutional applications
-            </p>
+          </div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Autonomous pool with Conflict-of-Interest verification
           </div>
         </div>
 
-        <div className="table-responsive">
-          <table className="custom-table">
+        <div className="table-wrap-clean">
+          <table className="table-clean">
             <thead>
               <tr>
                 <th>Expert ID & Name</th>
@@ -294,20 +321,20 @@ export function EvcHub({
               {INITIAL_EXPERTS_POOL.map(exp => (
                 <tr key={exp.id}>
                   <td>
-                    <strong>{exp.name}</strong>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{exp.id} • {exp.email}</div>
+                    <strong style={{ color: 'var(--text-primary)' }}>{exp.name}</strong>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>{exp.id} • {exp.email}</div>
                   </td>
-                  <td>{exp.affiliation}</td>
-                  <td>{exp.designation}</td>
-                  <td>{exp.specialization}</td>
-                  <td>{exp.city}</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{exp.affiliation}</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{exp.designation}</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{exp.specialization}</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{exp.city}</td>
                   <td>
-                    <span className="badge badge-success">
-                      <ShieldCheck size={12} /> Clear (Verified)
+                    <span className="status-pill status-compliant">
+                      <ShieldCheck size={12} /> Clear
                     </span>
                   </td>
                   <td>
-                    <span className="badge badge-info">{exp.status}</span>
+                    <span className="status-pill status-neutral">{exp.status}</span>
                   </td>
                 </tr>
               ))}
@@ -318,68 +345,99 @@ export function EvcHub({
 
       {/* Schedule EVC Modal */}
       {selectedAppForSchedule && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <Calendar size={20} color="#38bdf8" /> Schedule EVC Expert Panel
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setSelectedAppForSchedule(null); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '600px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline">COMMITTEE DISPATCH</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  Schedule EVC Expert Panel
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setSelectedAppForSchedule(null)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '2px' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleConfirmSchedule}>
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
-                padding: '12px 16px',
-                borderRadius: '8px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                padding: '12px 14px',
+                borderRadius: '2px',
                 marginBottom: '16px',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)'
               }}>
-                <div><strong>Application ID:</strong> {selectedAppForSchedule.id}</div>
-                <div><strong>Institution:</strong> {selectedAppForSchedule.instituteName}</div>
-                <div><strong>Location:</strong> {selectedAppForSchedule.city}, {selectedAppForSchedule.state} ({selectedAppForSchedule.region})</div>
+                <div><strong>Application ID:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedAppForSchedule.id}</span></div>
+                <div><strong>Institution:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedAppForSchedule.instituteName}</span></div>
+                <div><strong>Location:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedAppForSchedule.city}, {selectedAppForSchedule.state} ({selectedAppForSchedule.region})</span></div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                <div className="form-group">
-                  <label className="form-label">Inspection Date:</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    Inspection Date:
+                  </label>
                   <input 
                     type="date"
-                    className="form-input"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '2px',
+                      padding: '8px 12px',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
                     value={visitDate}
                     onChange={(e) => setVisitDate(e.target.value)}
                     required
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Visit Mode:</label>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    Visit Mode:
+                  </label>
                   <select 
-                    className="form-select"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '2px',
+                      padding: '8px 12px',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
                     value={visitMode}
                     onChange={(e) => setVisitMode(e.target.value)}
                   >
-                    <option value="Physical On-Site Inspection">Physical On-Site Inspection (Mandatory for New Inst)</option>
-                    <option value="Hybrid Digital & Live Video Inspection">Hybrid Digital & Live Video Inspection</option>
+                    <option value="Physical On-Site Inspection">Physical On-Site Inspection</option>
+                    <option value="Hybrid Digital & Live Video Inspection">Hybrid Digital & Video</option>
                   </select>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Selected 3-Member Expert Committee (No Conflict of Interest):</label>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  Assigned 3-Member Expert Committee:
+                </label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {INITIAL_EXPERTS_POOL.slice(0, 3).map(exp => (
                     <div 
                       key={exp.id}
                       style={{
-                        background: 'rgba(255, 255, 255, 0.04)',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
                         padding: '10px 14px',
-                        borderRadius: '6px',
+                        borderRadius: '2px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -387,11 +445,11 @@ export function EvcHub({
                       }}
                     >
                       <div>
-                        <strong>{exp.name}</strong> ({exp.designation})
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{exp.affiliation} • {exp.specialization}</div>
+                        <strong style={{ color: 'var(--text-primary)' }}>{exp.name}</strong> <span style={{ color: 'var(--text-muted)' }}>({exp.designation})</span>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{exp.affiliation} • {exp.specialization}</div>
                       </div>
-                      <span className="badge badge-success">
-                        <ShieldCheck size={12} /> Auto-Verified
+                      <span className="status-pill status-compliant">
+                        <ShieldCheck size={11} /> Verified
                       </span>
                     </div>
                   ))}
@@ -399,30 +457,32 @@ export function EvcHub({
               </div>
 
               <div style={{
-                background: 'rgba(56, 189, 248, 0.1)',
-                border: '1px solid rgba(56, 189, 248, 0.3)',
+                background: '#f8fafc',
+                border: '1px solid var(--border-subtle)',
                 padding: '10px 14px',
-                borderRadius: '6px',
-                fontSize: '0.74rem',
-                color: '#cbd5e1',
+                borderRadius: '2px',
+                fontSize: '0.75rem',
+                color: 'var(--text-secondary)',
                 marginBottom: '20px'
               }}>
-                Upon confirmation, automated appointment orders with confidentiality undertakings will be transmitted to the experts and schedule notification to the institution.
+                Upon confirmation, automated appointment orders with confidentiality undertakings will be transmitted to the experts and schedule notifications dispatched.
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn btn-secondary"
+                  className="btn-dark"
                   onClick={() => setSelectedAppForSchedule(null)}
+                  style={{ borderRadius: '2px' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-primary"
+                  className="btn-mint"
+                  style={{ borderRadius: '2px' }}
                 >
-                  <Send size={15} /> Confirm & Dispatch EVC Orders
+                  <Send size={14} /> Confirm & Dispatch Orders
                 </button>
               </div>
             </form>
@@ -432,88 +492,150 @@ export function EvcHub({
 
       {/* Upload EVC Report Modal */}
       {selectedAppForReport && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <UploadCloud size={20} color="#34d399" /> Upload & Digitally Sign EVC Report Dossier
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setSelectedAppForReport(null); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '600px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline">REPORT DOSSIER</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  Upload & Sign EVC Report
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setSelectedAppForReport(null)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '2px' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleConfirmReport}>
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
-                padding: '12px 16px',
-                borderRadius: '8px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                padding: '12px 14px',
+                borderRadius: '2px',
                 marginBottom: '16px',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)'
               }}>
-                <div><strong>Application:</strong> {selectedAppForReport.id}</div>
-                <div><strong>Institution:</strong> {selectedAppForReport.instituteName}</div>
-                <div><strong>Scheduled Date:</strong> {selectedAppForReport.evcDetails?.visitDate || 'Recent'}</div>
+                <div><strong>Application:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedAppForReport.id}</span></div>
+                <div><strong>Institution:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedAppForReport.instituteName}</span></div>
+                <div><strong>Scheduled Date:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedAppForReport.evcDetails?.visitDate || 'Recent'}</span></div>
               </div>
 
               {/* Scoring Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '16px' }}>
-                <div className="form-group">
-                  <label className="form-label">Infrastructure Compliance (%):</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Infra Compliance (%):
+                  </label>
                   <input 
                     type="number" 
                     min="0" 
                     max="100" 
-                    className="form-input"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '2px',
+                      padding: '8px 10px',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
                     value={infraScore}
                     onChange={(e) => setInfraScore(e.target.value)}
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Faculty Cadre Ratio (%):</label>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Faculty Ratio (%):
+                  </label>
                   <input 
                     type="number" 
                     min="0" 
                     max="100" 
-                    className="form-input"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '2px',
+                      padding: '8px 10px',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
                     value={facultyScore}
                     onChange={(e) => setFacultyScore(e.target.value)}
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Laboratory & Computing (%):</label>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Labs Compliance (%):
+                  </label>
                   <input 
                     type="number" 
                     min="0" 
                     max="100" 
-                    className="form-input"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '2px',
+                      padding: '8px 10px',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
                     value={labScore}
                     onChange={(e) => setLabScore(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Committee Recommendation & Finding:</label>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Committee Recommendation & Finding:
+                </label>
                 <select 
-                  className="form-select"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={evcOutcome}
                   onChange={(e) => setEvcOutcome(e.target.value)}
                 >
                   <option value="Recommended">Recommended for Approval (Full Compliance)</option>
                   <option value="Recommended with Time-Bound Undertaking">Recommended Subject to Time-Bound Undertaking</option>
-                  <option value="Deficiency Found - Refer to SAC">Deficiencies Found - Refer to Standing Appellate Committee (SAC)</option>
+                  <option value="Deficiency Found - Refer to SAC">Deficiencies Found - Refer to SAC</option>
                   <option value="Rejected">Not Recommended / Fatal Infrastructure Deficiencies</option>
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Committee Evaluation Summary & Geo-tagged Verification Remarks:</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Committee Evaluation Summary & Remarks:
+                </label>
                 <textarea 
-                  className="form-textarea"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '10px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
                   value={evcRemarks}
                   onChange={(e) => setEvcRemarks(e.target.value)}
                   rows={3}
@@ -524,16 +646,18 @@ export function EvcHub({
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn btn-secondary"
+                  className="btn-dark"
                   onClick={() => setSelectedAppForReport(null)}
+                  style={{ borderRadius: '2px' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-primary"
+                  className="btn-mint"
+                  style={{ borderRadius: '2px' }}
                 >
-                  <FileCheck size={15} /> Digitally Sign & Submit EVC Report
+                  <FileCheck size={14} /> Digitally Sign & Submit Report
                 </button>
               </div>
             </form>

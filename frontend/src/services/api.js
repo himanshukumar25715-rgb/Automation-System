@@ -1,4 +1,4 @@
-// AICTE PRAGATI-NAV Client API Service Layer
+// GovVerify Client API Service Layer
 // Communicates with backend REST API via Vite proxy (/api) with graceful local fallback
 
 const API_BASE = '/api';

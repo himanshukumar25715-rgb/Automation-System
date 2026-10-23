@@ -94,126 +94,104 @@ export function UndertakingsTracker({
 
   return (
     <div className="undertakings-tracker">
-      {/* Top Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
-        border: '1px solid var(--border-medium)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '18px 24px',
-        marginBottom: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge badge-success">
-              <ShieldCheck size={13} /> Institutional Compliance Registry
-            </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              Monitoring Approvals Granted Subject to Time-Bound Conditions (APH 2024–27)
-            </span>
-          </div>
-          <h2 style={{ fontSize: '1.35rem', marginTop: '6px' }}>
-            Time-Bound Undertakings & Compliance Evidence Tracker
-          </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
-            Automated alerts at 30, 15, and 7 days before deadline; proof upload and verification; auto-escalation of defaults to Standing Appellate Committee.
+          <div className="page-overline">COMPLIANCE REGISTRY</div>
+          <h1 className="page-title">Time-Bound Undertakings</h1>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '6px 0 0 0' }}>
+            Automated tracking of approvals granted subject to time-bound conditions and evidence verification.
           </p>
         </div>
 
         <button 
-          className="btn btn-primary btn-sm"
+          className="btn-mint"
           onClick={() => setIsAddModalOpen(true)}
           id="btn-add-undertaking"
+          style={{ padding: '8px 16px', fontSize: '0.82rem' }}
         >
-          <Plus size={15} /> Add New Conditional Undertaking
+          <Plus size={15} /> Add Undertaking
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Active Undertakings</span>
-            <div className="kpi-icon-wrap" style={{ color: '#38bdf8' }}>
-              <ShieldCheck size={18} />
+      {/* 4-Card Metric Grid */}
+      <div className="metric-grid" style={{ marginBottom: '28px' }}>
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Active Undertakings</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--sky-400)' }}>
+              <ShieldCheck size={20} />
             </div>
           </div>
-          <div className="kpi-value">{total}</div>
-          <div className="kpi-subtext">Across technical institutions</div>
+          <div className="metric-value">{total}</div>
         </div>
 
-        <div className="kpi-card alert-ruby">
-          <div className="kpi-header">
-            <span className="kpi-title" style={{ color: '#f87171' }}>Overdue Defaults</span>
-            <div className="kpi-icon-wrap" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.15)' }}>
-              <Flame size={18} />
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Overdue Defaults</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--coral-500)' }}>
+              <Flame size={20} />
             </div>
           </div>
-          <div className="kpi-value" style={{ color: '#f87171' }}>{overdue}</div>
-          <div className="kpi-subtext" style={{ color: '#fca5a5' }}>
-            Escalated for intake reduction / SAC
-          </div>
+          <div className="metric-value" style={{ color: 'var(--coral-500)' }}>{overdue}</div>
         </div>
 
-        <div className="kpi-card alert-amber">
-          <div className="kpi-header">
-            <span className="kpi-title" style={{ color: '#fbbf24' }}>Due in &le;30 Days</span>
-            <div className="kpi-icon-wrap" style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)' }}>
-              <Clock size={18} />
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Due in ≤30 Days</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--amber-500)' }}>
+              <Clock size={20} />
             </div>
           </div>
-          <div className="kpi-value" style={{ color: '#fbbf24' }}>{upcoming}</div>
-          <div className="kpi-subtext" style={{ color: '#fde68a' }}>
-            Automated SMS & Email dispatched
-          </div>
+          <div className="metric-value" style={{ color: 'var(--amber-500)' }}>{upcoming}</div>
         </div>
 
-        <div className="kpi-card">
-          <div className="kpi-header">
-            <span className="kpi-title">Awaiting Verification</span>
-            <div className="kpi-icon-wrap" style={{ color: '#34d399' }}>
-              <UploadCloud size={18} />
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-label">Awaiting Verification</span>
+            <div className="metric-icon-wrap" style={{ color: 'var(--mint-500)' }}>
+              <UploadCloud size={20} />
             </div>
           </div>
-          <div className="kpi-value">{submitted}</div>
-          <div className="kpi-subtext">Evidence submitted by Principal</div>
+          <div className="metric-value">{submitted}</div>
         </div>
       </div>
 
       {/* Main Ledger Table Panel */}
-      <div className="panel">
-        <div className="panel-header">
+      <div style={{ marginBottom: '28px' }}>
+        <div className="section-header-clean">
           <div>
-            <h3 className="panel-title">
-              <FileCheck size={20} color="#34d399" /> Digital Register of Prescribed Institutional Undertakings
+            <div className="page-overline">REGISTER LEDGER</div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              Prescribed Undertakings Register
             </h3>
-            <p style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
-              Real-time countdown, proof verification, and authorized AICTE action
-            </p>
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
-            <div style={{ position: 'relative', width: '240px' }}>
-              <Search size={15} style={{ position: 'absolute', left: '10px', top: '11px', color: '#64748b' }} />
+            <div style={{ position: 'relative', width: '220px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-muted)' }} />
               <input
                 type="text"
                 placeholder="Search undertaking..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="form-input"
-                style={{ paddingLeft: '32px', fontSize: '0.78rem' }}
+                className="search-input-clean"
+                style={{ width: '100%', fontSize: '0.8rem', padding: '6px 10px 6px 30px' }}
               />
             </div>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="form-select"
-              style={{ width: '160px', fontSize: '0.78rem' }}
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-primary)',
+                borderRadius: '2px',
+                padding: '6px 12px',
+                fontSize: '0.8rem',
+                outline: 'none'
+              }}
             >
               <option value="ALL">All Statuses</option>
               <option value="Pending">Pending Evidence</option>
@@ -224,8 +202,8 @@ export function UndertakingsTracker({
           </div>
         </div>
 
-        <div className="table-responsive">
-          <table className="custom-table">
+        <div className="table-wrap-clean">
+          <table className="table-clean">
             <thead>
               <tr>
                 <th>Undertaking ID & App</th>
@@ -244,51 +222,51 @@ export function UndertakingsTracker({
                 return (
                   <tr key={u.id}>
                     <td>
-                      <span style={{ fontWeight: 700, color: '#38bdf8' }}>{u.id}</span>
-                      <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{u.appId}</div>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{u.id}</span>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{u.appId}</div>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{u.institute}</div>
-                      <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Region: {u.region}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{u.institute}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Region: {u.region}</div>
                     </td>
-                    <td style={{ maxWidth: '300px' }}>
-                      <div style={{ fontSize: '0.82rem', color: '#e2e8f0' }}>{u.condition}</div>
-                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '2px' }}>
+                    <td style={{ maxWidth: '280px' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{u.condition}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                         Ref: {u.clause}
                       </div>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{u.dueDate}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.82rem' }}>{u.dueDate}</div>
                     </td>
                     <td>
                       {isOverdue ? (
-                        <span className="sla-pill sla-breached">
-                          <Flame size={12} /> {Math.abs(u.daysRemaining)} Days Overdue
+                        <span className="status-pill status-danger">
+                          <Flame size={12} /> {Math.abs(u.daysRemaining)}d Overdue
                         </span>
                       ) : u.daysRemaining <= 30 ? (
-                        <span className="sla-pill sla-warning">
-                          <Clock size={12} /> {u.daysRemaining} Days Left
+                        <span className="status-pill status-warning">
+                          <Clock size={12} /> {u.daysRemaining}d Left
                         </span>
                       ) : (
-                        <span className="sla-pill sla-normal">
-                          <Clock size={12} /> {u.daysRemaining} Days Left
+                        <span className="status-pill status-neutral">
+                          <Clock size={12} /> {u.daysRemaining}d Left
                         </span>
                       )}
                     </td>
                     <td>
                       {u.evidenceFile ? (
-                        <span className="badge badge-info" title={u.evidenceFile}>
-                          <FileCheck size={12} /> {u.evidenceFile}
+                        <span className="status-pill status-neutral" title={u.evidenceFile}>
+                          <FileCheck size={11} style={{ color: 'var(--mint-500)' }} /> {u.evidenceFile}
                         </span>
                       ) : (
-                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Not Uploaded</span>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Not Uploaded</span>
                       )}
                     </td>
                     <td>
-                      <span className={`badge ${
-                        u.status === 'Overdue Breach' ? 'badge-critical' :
-                        u.status === 'Submitted' ? 'badge-warning' :
-                        u.status === 'Verified & Closed' ? 'badge-success' : 'badge-info'
+                      <span className={`status-pill ${
+                        u.status === 'Overdue Breach' ? 'status-danger' :
+                        u.status === 'Submitted' ? 'status-warning' :
+                        u.status === 'Verified & Closed' ? 'status-compliant' : 'status-neutral'
                       }`}>
                         {u.status}
                       </span>
@@ -299,21 +277,22 @@ export function UndertakingsTracker({
                         {u.status !== 'Verified & Closed' && (
                           can(Permission.UPLOAD_COMPLIANCE_EVIDENCE) ? (
                             <button
-                              className="btn btn-secondary btn-sm"
+                              className="btn-dark"
                               onClick={() => handleOpenUpload(u)}
                               title="Institution portal upload compliance evidence"
                               id={`btn-upload-evidence-${u.id}`}
+                              style={{ padding: '5px 10px', fontSize: '0.74rem' }}
                             >
-                              <UploadCloud size={13} /> Upload Proof
+                              <UploadCloud size={12} /> Upload
                             </button>
                           ) : (
                             <button
-                              className="btn btn-secondary btn-sm"
+                              className="btn-dark"
                               disabled
-                              style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                              style={{ opacity: 0.4, cursor: 'not-allowed', padding: '5px 10px', fontSize: '0.74rem' }}
                               title={getRestrictionReason(Permission.UPLOAD_COMPLIANCE_EVIDENCE)}
                             >
-                              <UploadCloud size={13} /> Upload Proof
+                              <UploadCloud size={12} /> Upload
                             </button>
                           )
                         )}
@@ -322,21 +301,22 @@ export function UndertakingsTracker({
                         {u.status === 'Submitted' && (
                           can(Permission.VERIFY_REJECT_UNDERTAKING) ? (
                             <button
-                              className="btn btn-primary btn-sm"
+                              className="btn-mint"
                               onClick={() => handleOpenVerify(u)}
                               title="AICTE Regional Officer review & verification"
                               id={`btn-verify-evidence-${u.id}`}
+                              style={{ padding: '5px 10px', fontSize: '0.74rem' }}
                             >
-                              <CheckCircle2 size={13} /> Verify Evidence
+                              <CheckCircle2 size={12} /> Verify
                             </button>
                           ) : (
                             <button
-                              className="btn btn-secondary btn-sm"
+                              className="btn-dark"
                               disabled
-                              style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                              style={{ opacity: 0.4, cursor: 'not-allowed', padding: '5px 10px', fontSize: '0.74rem' }}
                               title={getRestrictionReason(Permission.VERIFY_REJECT_UNDERTAKING)}
                             >
-                              <CheckCircle2 size={13} /> Verify Evidence
+                              <CheckCircle2 size={12} /> Verify
                             </button>
                           )
                         )}
@@ -352,39 +332,56 @@ export function UndertakingsTracker({
 
       {/* Upload Evidence Modal */}
       {uploadModalUndertaking && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <UploadCloud size={20} color="#38bdf8" /> Online Submission of Compliance Evidence
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setUploadModalUndertaking(null); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '580px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline">COMPLIANCE SUBMISSION</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  Submit Compliance Evidence
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setUploadModalUndertaking(null)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleConfirmUpload}>
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
-                padding: '12px 16px',
-                borderRadius: '8px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                padding: '12px 14px',
+                borderRadius: '2px',
                 marginBottom: '16px',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)'
               }}>
-                <div><strong>Undertaking:</strong> {uploadModalUndertaking.id}</div>
-                <div><strong>Institution:</strong> {uploadModalUndertaking.institute}</div>
-                <div><strong>Condition:</strong> {uploadModalUndertaking.condition}</div>
-                <div><strong>Stipulated Deadline:</strong> {uploadModalUndertaking.dueDate}</div>
+                <div><strong>Undertaking:</strong> <span style={{ color: 'var(--text-primary)' }}>{uploadModalUndertaking.id}</span></div>
+                <div><strong>Institution:</strong> <span style={{ color: 'var(--text-primary)' }}>{uploadModalUndertaking.institute}</span></div>
+                <div><strong>Condition:</strong> <span style={{ color: 'var(--text-primary)' }}>{uploadModalUndertaking.condition}</span></div>
+                <div><strong>Stipulated Deadline:</strong> <span style={{ color: 'var(--text-primary)' }}>{uploadModalUndertaking.dueDate}</span></div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Supporting Compliance Document (PDF):</label>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Supporting Compliance Document (PDF):
+                </label>
                 <input 
                   type="text" 
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={evidenceFileName}
                   onChange={(e) => setEvidenceFileName(e.target.value)}
                   placeholder="e.g. Bescom_NOC_Approval_Solar_Power.pdf"
@@ -392,10 +389,22 @@ export function UndertakingsTracker({
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Institutional Remarks & Reference Numbers:</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Institutional Remarks & Reference Numbers:
+                </label>
                 <textarea 
-                  className="form-textarea"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '10px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
                   value={evidenceNotes}
                   onChange={(e) => setEvidenceNotes(e.target.value)}
                   placeholder="State transaction reference, competent authority sanction letter no., or date of commissioning..."
@@ -407,16 +416,18 @@ export function UndertakingsTracker({
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn btn-secondary"
+                  className="btn-dark"
                   onClick={() => setUploadModalUndertaking(null)}
+                  style={{ borderRadius: '2px' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-primary"
+                  className="btn-mint"
+                  style={{ borderRadius: '2px' }}
                 >
-                  <Send size={15} /> Submit for AICTE RO Verification
+                  <Send size={14} /> Submit for Verification
                 </button>
               </div>
             </form>
@@ -426,37 +437,55 @@ export function UndertakingsTracker({
 
       {/* Verification Modal for RO */}
       {verifyModalUndertaking && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <CheckCircle2 size={20} color="#10b981" /> AICTE Officer Verification of Compliance Proof
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setVerifyModalUndertaking(null); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '580px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline">OFFICER VERIFICATION</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  Verify Compliance Proof
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setVerifyModalUndertaking(null)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <div style={{
-              background: 'rgba(15, 23, 42, 0.7)',
-              padding: '12px 16px',
-              borderRadius: '8px',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
+              padding: '12px 14px',
+              borderRadius: '2px',
               marginBottom: '16px',
-              fontSize: '0.8rem'
+              fontSize: '0.8rem',
+              color: 'var(--text-secondary)'
             }}>
-              <div><strong>Undertaking:</strong> {verifyModalUndertaking.id}</div>
-              <div><strong>Institution:</strong> {verifyModalUndertaking.institute}</div>
-              <div><strong>Uploaded Document:</strong> {verifyModalUndertaking.evidenceFile || 'Proof_Document.pdf'}</div>
-              <div><strong>Requirement:</strong> {verifyModalUndertaking.condition}</div>
+              <div><strong>Undertaking:</strong> <span style={{ color: 'var(--text-primary)' }}>{verifyModalUndertaking.id}</span></div>
+              <div><strong>Institution:</strong> <span style={{ color: 'var(--text-primary)' }}>{verifyModalUndertaking.institute}</span></div>
+              <div><strong>Uploaded Document:</strong> <span style={{ color: 'var(--text-primary)' }}>{verifyModalUndertaking.evidenceFile || 'Proof_Document.pdf'}</span></div>
+              <div><strong>Requirement:</strong> <span style={{ color: 'var(--text-primary)' }}>{verifyModalUndertaking.condition}</span></div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Officer Scrutiny & Verification Remarks:</label>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                Officer Scrutiny & Verification Remarks:
+              </label>
               <textarea 
-                className="form-textarea"
+                style={{
+                  width: '100%',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                  borderRadius: '2px',
+                  padding: '10px 12px',
+                  fontSize: '0.82rem',
+                  outline: 'none',
+                  resize: 'vertical'
+                }}
                 value={verificationRemarks}
                 onChange={(e) => setVerificationRemarks(e.target.value)}
                 rows={3}
@@ -467,17 +496,19 @@ export function UndertakingsTracker({
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button 
                 type="button" 
-                className="btn btn-danger"
+                className="btn-dark"
+                style={{ color: 'var(--coral-500)', borderColor: 'rgba(255, 77, 106, 0.4)', borderRadius: '2px' }}
                 onClick={() => handleConfirmVerify(false)}
               >
-                Reject & Escalate to SAC
+                Reject & Escalate
               </button>
               <button 
                 type="button" 
-                className="btn btn-primary"
+                className="btn-mint"
+                style={{ borderRadius: '2px' }}
                 onClick={() => handleConfirmVerify(true)}
               >
-                <CheckCircle2 size={15} /> Approve & Close Undertaking
+                <CheckCircle2 size={14} /> Approve & Close
               </button>
             </div>
           </div>
@@ -486,47 +517,85 @@ export function UndertakingsTracker({
 
       {/* Add New Undertaking Modal */}
       {isAddModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <Plus size={20} color="#38bdf8" /> Issue New Time-Bound Undertaking
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setIsAddModalOpen(false); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '580px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline">ISSUE COMPLIANCE CONDITION</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  New Time-Bound Undertaking
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setIsAddModalOpen(false)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleAddSubmit}>
-              <div className="form-group">
-                <label className="form-label">Application ID:</label>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  Application ID:
+                </label>
                 <input 
                   type="text" 
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={newAppId}
                   onChange={(e) => setNewAppId(e.target.value)}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Institution Name:</label>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  Institution Name:
+                </label>
                 <input 
                   type="text" 
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={newInstitute}
                   onChange={(e) => setNewInstitute(e.target.value)}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Prescribed Undertaking Condition:</label>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  Prescribed Undertaking Condition:
+                </label>
                 <textarea 
-                  className="form-textarea"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
                   value={newCondition}
                   onChange={(e) => setNewCondition(e.target.value)}
                   placeholder="e.g. Appointment of 2 Associate Professors or Structural Safety NOC submission..."
@@ -535,23 +604,45 @@ export function UndertakingsTracker({
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="form-group">
-                  <label className="form-label">APH Clause Reference:</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    APH Clause Reference:
+                  </label>
                   <input 
                     type="text" 
-                    className="form-input"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '2px',
+                      padding: '8px 12px',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
                     value={newClause}
                     onChange={(e) => setNewClause(e.target.value)}
                     required
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Stipulated Deadline Due Date:</label>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Stipulated Deadline:
+                  </label>
                   <input 
                     type="date" 
-                    className="form-input"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '2px',
+                      padding: '8px 12px',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
                     value={newDueDate}
                     onChange={(e) => setNewDueDate(e.target.value)}
                     required
@@ -559,19 +650,21 @@ export function UndertakingsTracker({
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn btn-secondary"
+                  className="btn-dark"
                   onClick={() => setIsAddModalOpen(false)}
+                  style={{ borderRadius: '2px' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-primary"
+                  className="btn-mint"
+                  style={{ borderRadius: '2px' }}
                 >
-                  <Plus size={15} /> Save & Enforce Undertaking
+                  <Plus size={14} /> Save & Enforce
                 </button>
               </div>
             </form>

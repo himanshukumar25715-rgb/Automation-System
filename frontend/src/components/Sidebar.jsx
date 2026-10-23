@@ -27,7 +27,6 @@ export function Sidebar({
 }) {
   const roleType = currentRole?.role || Role.BUREAU_HEAD;
 
-  // Build role-specific sidebar navigation items as explicitly mandated
   let navItems = [];
 
   if (roleType === Role.INSTITUTION) {
@@ -47,96 +46,50 @@ export function Sidebar({
       { id: 'documents', label: 'Documents', icon: FileCheck, badge: counts.criticalDocs > 0 ? counts.criticalDocs : null, badgeColor: '#ef4444' },
       { id: 'alerts', label: 'Alerts', icon: Bell, badge: counts.alerts > 0 ? counts.alerts : null },
       { id: 'region_reports', label: 'Region Reports', icon: BarChart3 },
-      { id: 'audit', label: 'Audit Trail (Regional)', icon: History },
+      { id: 'audit', label: 'Audit Trail', icon: History },
     ];
   } else {
-    // Bureau Head
     navItems = [
       { id: 'dashboard', label: 'National Dashboard', icon: Layers },
       { id: 'applications', label: 'All Applications', icon: FileText, badge: counts.applications },
       { id: 'escalations', label: 'Escalations', icon: AlertTriangle, badge: counts.escalations > 0 ? counts.escalations : null, badgeColor: '#ef4444' },
       { id: 'reports', label: 'Reports', icon: BarChart3 },
-      { id: 'audit', label: 'Audit Trail (Full)', icon: History },
-      { id: 'rules', label: 'Rules & Configuration', icon: Sliders },
+      { id: 'audit', label: 'Audit Trail', icon: History },
+      { id: 'rules', label: 'Rules & Policy', icon: Sliders },
       { id: 'integrations', label: 'Integrations', icon: Network },
     ];
   }
 
   return (
-    <aside className="app-sidebar" style={{
-      width: '260px',
-      background: 'rgba(15, 23, 42, 0.95)',
-      backdropFilter: 'blur(16px)',
-      borderRight: '1px solid var(--border-subtle)',
+    <aside style={{
+      width: '240px',
+      background: '#ffffff',
+      borderRight: '1px solid var(--border-medium)',
+      boxShadow: '2px 0 10px rgba(15, 23, 42, 0.04)',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
       flexShrink: 0,
-      minHeight: 'calc(100vh - 100px)'
+      minHeight: 'calc(100vh - 60px)',
+      padding: '16px 12px'
     }}>
-      {/* Top User Role Profile Box */}
       <div>
+        {/* Navigation Category Label */}
         <div style={{
-          padding: '18px 20px',
-          borderBottom: '1px solid var(--border-subtle)',
-          background: 'rgba(30, 41, 59, 0.5)'
+          fontSize: '0.68rem',
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          color: 'var(--text-dim)',
+          fontWeight: 700,
+          padding: '6px 12px 10px 12px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: roleType === Role.INSTITUTION ? 'linear-gradient(135deg, #0284c7, #0369a1)' :
-                          roleType === Role.REGIONAL_OFFICER ? 'linear-gradient(135deg, #059669, #047857)' :
-                          'linear-gradient(135deg, #7c3aed, #6d28d9)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white'
-            }}>
-              {roleType === Role.INSTITUTION ? <GraduationCap size={18} /> :
-               roleType === Role.REGIONAL_OFFICER ? <ShieldCheck size={18} /> :
-               <Building2 size={18} />}
-            </div>
-            <div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1.2 }}>
-                {currentRole?.badge}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                {roleType === Role.INSTITUTION ? `ID: ${currentRole?.institutionId}` :
-                 roleType === Role.REGIONAL_OFFICER ? `Region: ${currentRole?.region}` :
-                 'All 8 Regions (HQ)'}
-              </div>
-            </div>
-          </div>
-
-          <div style={{
-            fontSize: '0.72rem',
-            color: '#cbd5e1',
-            background: 'rgba(15, 23, 42, 0.6)',
-            padding: '6px 10px',
-            borderRadius: '6px',
-            border: '1px solid var(--border-subtle)'
-          }}>
-            {currentRole?.officer}
-          </div>
+          {roleType === Role.INSTITUTION ? 'Institution' :
+           roleType === Role.REGIONAL_OFFICER ? `Regional Desk (${currentRole?.region})` :
+           'National Governance'}
         </div>
 
-        {/* Sidebar Navigation Items */}
-        <nav style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div style={{
-            fontSize: '0.68rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            color: '#64748b',
-            fontWeight: 700,
-            padding: '4px 10px 8px 10px'
-          }}>
-            {roleType === Role.INSTITUTION ? 'Institution Portal' :
-             roleType === Role.REGIONAL_OFFICER ? `Regional Menu (${currentRole?.region})` :
-             'Apex Governance'}
-          </div>
-
+        {/* Sidebar Nav Items */}
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
           {navItems.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -149,31 +102,32 @@ export function Sidebar({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
+                  padding: '9px 12px',
+                  borderRadius: '2px',
                   fontSize: '0.82rem',
-                  fontWeight: 600,
+                  fontWeight: isActive ? 700 : 500,
                   fontFamily: 'var(--font-sans)',
-                  color: isActive ? '#ffffff' : '#94a3b8',
-                  background: isActive ? 'linear-gradient(135deg, #0284c7, #2563eb)' : 'transparent',
-                  border: 'none',
+                  color: isActive ? '#ffffff' : '#334155',
+                  background: isActive ? '#0f172a' : 'transparent',
+                  border: isActive ? '1px solid #0f172a' : '1px solid transparent',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.15s ease',
-                  boxShadow: isActive ? '0 4px 12px rgba(37, 99, 235, 0.35)' : 'none'
+                  boxShadow: isActive ? '0 1px 3px rgba(15, 23, 42, 0.2)' : 'none'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Icon size={16} />
+                  <Icon size={16} color={isActive ? '#ffffff' : 'var(--text-dim)'} />
                   <span>{item.label}</span>
                 </div>
 
                 {item.badge && (
                   <span style={{
-                    background: item.badgeColor || '#334155',
-                    color: 'white',
-                    padding: '2px 7px',
-                    borderRadius: '999px',
+                    background: item.badgeColor ? '#fee2e2' : isActive ? '#334155' : '#f1f5f9',
+                    color: item.badgeColor ? '#b91c1c' : isActive ? '#ffffff' : '#475569',
+                    border: item.badgeColor ? '1px solid #fecaca' : '1px solid var(--border-subtle)',
+                    padding: '1px 6px',
+                    borderRadius: '2px',
                     fontSize: '0.68rem',
                     fontWeight: 700
                   }}>
@@ -187,18 +141,18 @@ export function Sidebar({
       </div>
 
       {/* Switch Role Quick Button at Bottom */}
-      <div style={{ padding: '16px 14px', borderTop: '1px solid var(--border-subtle)' }}>
+      <div style={{ paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
         <button
           onClick={onOpenSwitchRole}
-          className="btn btn-secondary"
-          style={{ width: '100%', fontSize: '0.78rem', padding: '10px', justifyContent: 'space-between' }}
+          className="btn-dark"
+          style={{ width: '100%', fontSize: '0.78rem', padding: '8px 12px', justifyContent: 'space-between', borderRadius: '2px' }}
           id="btn-switch-role-sidebar"
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <UserCheck size={15} color="#38bdf8" />
-            <span>Switch Role (Demo)</span>
+            <UserCheck size={14} color="#0f172a" />
+            <span>Switch Role</span>
           </div>
-          <ChevronRight size={14} color="#64748b" />
+          <ChevronRight size={13} color="var(--text-dim)" />
         </button>
       </div>
     </aside>

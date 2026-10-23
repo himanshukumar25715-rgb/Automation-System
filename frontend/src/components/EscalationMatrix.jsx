@@ -61,7 +61,7 @@ export function EscalationMatrix({
               During preliminary scrutiny of your application for <em>{selectedApp.type}</em>, the Scrutiny Committee constituted under the provisions of the AICTE Approval Process Handbook (APH) has identified deficiencies requiring rectification.
             </p>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', padding: '10px 14px', borderRadius: '6px', margin: '12px 0' }}>
+            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', padding: '10px 14px', borderRadius: '2px', margin: '12px 0' }}>
               <strong>Recorded Discrepancy:</strong>
               <div>• {selectedApp.deficiencies?.[0]?.description || 'Shortfall in cadre-ratio faculty and lab equipment manuals.'}</div>
               <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px' }}>
@@ -103,7 +103,7 @@ export function EscalationMatrix({
               Under the powers vested under Section 10 of the AICTE Act, 1987, the Competent Authority is pleased to constitute an Expert Visit Committee to conduct on-site verification of <strong>{selectedApp.instituteName}</strong> for <em>{selectedApp.type}</em>.
             </p>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', padding: '10px 14px', borderRadius: '6px', margin: '12px 0' }}>
+            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', padding: '10px 14px', borderRadius: '2px', margin: '12px 0' }}>
               <strong>Mandated Panel:</strong>
               <div>1. Senior Academic Expert (Lead Member - IIT/NIT/Univ)</div>
               <div>2. Senior Architect / Structural Engineer (Civil & Safety Nominee)</div>
@@ -140,7 +140,7 @@ export function EscalationMatrix({
               Notice is hereby given that the registered lease deed for the technical campus of your institution is due to expire. Under APH Chapter I Clause 2.3, unbroken registered leasehold title is a non-negotiable statutory condition of approval.
             </p>
 
-            <div style={{ background: '#fef2f2', border: '1px solid #f87171', padding: '10px 14px', borderRadius: '6px', margin: '12px 0', color: '#991b1b' }}>
+            <div style={{ background: '#fef2f2', border: '1px solid #f87171', padding: '10px 14px', borderRadius: '2px', margin: '12px 0', color: '#991b1b' }}>
               <strong>Regulatory Consequence:</strong> Extension of Approval (EoA) for Academic Year 2027–28 shall remain in abeyance / frozen until certified registered lease renewal deed is uploaded and approved.
             </div>
 
@@ -183,30 +183,31 @@ export function EscalationMatrix({
     <div className="escalation-matrix">
       {/* Top Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
+        background: '#ffffff',
         border: '1px solid var(--border-medium)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: '2px',
         padding: '18px 24px',
         marginBottom: '24px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '16px'
+        gap: '16px',
+        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)'
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="badge badge-critical">
               <Flame size={13} /> Hierarchical Escalation & Notification Engine
             </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
               Automated Follow-up Reduction & Multi-Tier Governance
             </span>
           </div>
-          <h2 style={{ fontSize: '1.35rem', marginTop: '6px' }}>
+          <h2 style={{ fontSize: '1.35rem', marginTop: '6px', color: 'var(--text-main)' }}>
             Automated Escalations, Alerts & Standardized Communications
           </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
+          <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
             Auto-dispatched notifications, strict SLA escalation tiers, and standardized regulatory communications.
           </p>
         </div>
@@ -224,7 +225,7 @@ export function EscalationMatrix({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', marginBottom: '24px' }}>
         
         {/* Tier Diagram */}
-        <div className="panel" style={{ margin: 0 }}>
+        <div className="panel" style={{ margin: 0, borderRadius: '2px' }}>
           <div className="panel-header">
             <h3 className="panel-title">
               <ShieldAlert size={18} color="#ef4444" /> Multi-Tier Escalation Matrix
@@ -233,55 +234,55 @@ export function EscalationMatrix({
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{
-              background: 'rgba(239, 68, 68, 0.12)',
-              border: '1px solid rgba(239, 68, 68, 0.4)',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
               padding: '12px 14px',
-              borderRadius: '8px'
+              borderRadius: '2px'
             }}>
-              <div style={{ fontWeight: 700, color: '#f87171', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ fontWeight: 700, color: '#dc2626', display: 'flex', justifyContent: 'space-between' }}>
                 <span>Level 3 Escalation</span>
                 <span>SLA + 8 Days</span>
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>
+              <div style={{ fontSize: '0.78rem', color: '#991b1b', marginTop: '4px' }}>
                 <strong>Authority:</strong> AICTE Member Secretary & Apex Council
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+              <div style={{ fontSize: '0.72rem', color: '#b91c1c' }}>
                 Action: Automated emergency docket, punitive notice to RO, daily flash report.
               </div>
             </div>
 
             <div style={{
-              background: 'rgba(245, 158, 11, 0.12)',
-              border: '1px solid rgba(245, 158, 11, 0.4)',
+              background: '#fffbeb',
+              border: '1px solid #fde68a',
               padding: '12px 14px',
-              borderRadius: '8px'
+              borderRadius: '2px'
             }}>
-              <div style={{ fontWeight: 700, color: '#fbbf24', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ fontWeight: 700, color: '#d97706', display: 'flex', justifyContent: 'space-between' }}>
                 <span>Level 2 Escalation</span>
                 <span>SLA + 5 Days</span>
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>
+              <div style={{ fontSize: '0.78rem', color: '#92400e', marginTop: '4px' }}>
                 <strong>Authority:</strong> Adviser (Approval Bureau), AICTE HQ
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+              <div style={{ fontSize: '0.72rem', color: '#b45309' }}>
                 Action: Directive memo to Regional Officer to reassign or resolve bottleneck.
               </div>
             </div>
 
             <div style={{
-              background: 'rgba(2, 132, 199, 0.12)',
-              border: '1px solid rgba(2, 132, 199, 0.4)',
+              background: '#f0f9ff',
+              border: '1px solid #bae6fd',
               padding: '12px 14px',
-              borderRadius: '8px'
+              borderRadius: '2px'
             }}>
-              <div style={{ fontWeight: 700, color: '#38bdf8', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ fontWeight: 700, color: '#0284c7', display: 'flex', justifyContent: 'space-between' }}>
                 <span>Level 1 Escalation</span>
                 <span>SLA + 2 Days</span>
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '4px' }}>
+              <div style={{ fontSize: '0.78rem', color: '#0369a1', marginTop: '4px' }}>
                 <strong>Authority:</strong> Regional Officer (RO)
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+              <div style={{ fontSize: '0.72rem', color: '#0284c7' }}>
                 Action: Direct SMS/Email reminder to Scrutiny Committee / Lead EVC Expert.
               </div>
             </div>
@@ -327,17 +328,18 @@ export function EscalationMatrix({
               <div 
                 key={n.id}
                 style={{
-                  background: n.read ? 'rgba(15, 23, 42, 0.4)' : 'rgba(15, 23, 42, 0.85)',
+                  background: n.read ? '#f8fafc' : '#ffffff',
                   border: `1px solid ${
-                    n.severity === 'critical' ? 'rgba(239, 68, 68, 0.4)' :
-                    n.severity === 'warning' ? 'rgba(245, 158, 11, 0.4)' : 'var(--border-subtle)'
+                    n.severity === 'critical' ? '#fca5a5' :
+                    n.severity === 'warning' ? '#fde68a' : 'var(--border-subtle)'
                   }`,
-                  borderRadius: '8px',
+                  borderRadius: '2px',
                   padding: '12px 14px',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'flex-start',
-                  gap: '12px'
+                  gap: '12px',
+                  boxShadow: n.read ? 'none' : '0 1px 3px rgba(15, 23, 42, 0.04)'
                 }}
               >
                 <div>
@@ -351,8 +353,8 @@ export function EscalationMatrix({
                     <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{n.timestamp}</span>
                     {n.region && <span className="badge badge-info">{n.region}</span>}
                   </div>
-                  <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{n.title}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '2px' }}>{n.message}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-main)' }}>{n.title}</div>
+                  <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>{n.message}</div>
                 </div>
 
                 {!n.read && (
@@ -371,13 +373,13 @@ export function EscalationMatrix({
       </div>
 
       {/* Standardized Communication Generator */}
-      <div className="panel">
+      <div className="panel" style={{ borderRadius: '2px' }}>
         <div className="panel-header">
           <div>
             <h3 className="panel-title">
-              <FileText size={20} color="#34d399" /> Standardized Communication & Order Generator
+              <FileText size={20} color="#059669" /> Standardized Communication & Order Generator
             </h3>
-            <p style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+            <p style={{ fontSize: '0.76rem', color: '#64748b' }}>
               Automated drafting of statutory deficiency memos, EVC appointment orders, and show-cause notices
             </p>
           </div>
@@ -387,7 +389,7 @@ export function EscalationMatrix({
               value={selectedTemplate}
               onChange={(e) => setSelectedTemplate(e.target.value)}
               className="form-select"
-              style={{ width: '220px', fontSize: '0.78rem' }}
+              style={{ width: '220px', fontSize: '0.78rem', borderRadius: '2px' }}
             >
               <option value="DEFICIENCY_MEMO">Deficiency Memorandum Letter</option>
               <option value="EVC_APPOINTMENT">EVC Panel Constitution Order</option>
@@ -398,7 +400,7 @@ export function EscalationMatrix({
               value={previewAppId}
               onChange={(e) => setPreviewAppId(e.target.value)}
               className="form-select"
-              style={{ width: '240px', fontSize: '0.78rem' }}
+              style={{ width: '240px', fontSize: '0.78rem', borderRadius: '2px' }}
             >
               {applications.map(a => (
                 <option key={a.id} value={a.id}>{a.id} - {a.instituteName.slice(0, 24)}...</option>
@@ -416,9 +418,9 @@ export function EscalationMatrix({
 
         {/* Live Document Preview Box */}
         <div style={{
-          background: 'rgba(0, 0, 0, 0.4)',
+          background: '#f1f5f9',
           padding: '24px',
-          borderRadius: '12px',
+          borderRadius: '2px',
           border: '1px solid var(--border-medium)',
           display: 'flex',
           justifyContent: 'center'

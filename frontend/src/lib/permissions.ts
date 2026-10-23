@@ -1,4 +1,4 @@
-// AICTE PRAGATI-NAV - Role-Based Access Control (RBAC) System
+// GovVerify - Role-Based Access Control (RBAC) System
 // Single Source of Truth for Permissions, Roles, and Data Scoping
 
 import React from 'react';

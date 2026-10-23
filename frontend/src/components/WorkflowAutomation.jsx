@@ -107,34 +107,16 @@ export function WorkflowAutomation({
 
   return (
     <div className="workflow-automation">
-      {/* Top Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
-        border: '1px solid var(--border-medium)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '18px 24px',
-        marginBottom: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge badge-purple">
-              <GitBranch size={13} /> AICTE Dynamic Workflow Router
-            </span>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-              Compliant with APH 2024–27 Chapter II & III
-            </span>
-          </div>
-          <h2 style={{ fontSize: '1.35rem', marginTop: '6px' }}>
-            {isRole(Role.INSTITUTION) ? 'My Institutional Application Workflow' :
-             isRole(Role.REGIONAL_OFFICER) ? `${currentRole?.region} Regional Applications Workflow Engine` :
-             'National End-to-End Approval Workflows (All Regions)'}
-          </h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '2px' }}>
+          <div className="page-overline">WORKFLOW ROUTER & ENGINE</div>
+          <h1 className="page-title">
+            {isRole(Role.INSTITUTION) ? 'Application Workflow' :
+             isRole(Role.REGIONAL_OFFICER) ? `${currentRole?.region} Regional Workflow` :
+             'Approval Workflows'}
+          </h1>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '6px 0 0 0' }}>
             {isRole(Role.INSTITUTION) 
               ? 'Real-time stage tracking, deficiency response portal, and electronic case summary.'
               : 'Automated stage advancement, statutory deficiency revert notices, and APH compliance checks.'}
@@ -142,45 +124,54 @@ export function WorkflowAutomation({
         </div>
 
         {/* Route Quick Pills */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            onClick={() => setSelectedRouteFilter('ALL')}
+            className={selectedRouteFilter === 'ALL' ? 'btn-mint' : 'btn-dark'}
+            style={{ padding: '7px 14px', fontSize: '0.78rem' }}
+          >
+            All Routes
+          </button>
           {Object.values(WORKFLOW_ROUTES).map(r => (
             <button
               key={r.id}
               onClick={() => setSelectedRouteFilter(selectedRouteFilter === r.id ? 'ALL' : r.id)}
-              className="btn btn-secondary btn-sm"
+              className="btn-dark"
               style={{
-                borderColor: selectedRouteFilter === r.id ? r.color : undefined,
-                background: selectedRouteFilter === r.id ? `${r.color}25` : undefined,
+                borderColor: selectedRouteFilter === r.id ? '#0f172a' : undefined,
                 color: selectedRouteFilter === r.id ? '#ffffff' : undefined,
-                fontSize: '0.75rem'
+                background: selectedRouteFilter === r.id ? '#0f172a' : undefined,
+                padding: '7px 12px',
+                fontSize: '0.78rem',
+                borderRadius: '2px'
               }}
             >
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: r.color }} />
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: r.color, display: 'inline-block' }} />
               {r.title}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Filter Toolbar (Only show Region selector if user is Bureau Head) */}
+      {/* Filter Toolbar */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '18px',
+        marginBottom: '20px',
         gap: '14px',
         flexWrap: 'wrap'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '300px' }}>
-          <div style={{ position: 'relative', width: '100%', maxWidth: '360px' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: '300px' }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '380px' }}>
+            <Search size={15} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search by ID, institute name, or city..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="form-input"
-              style={{ paddingLeft: '36px' }}
+              className="search-input-clean"
+              style={{ width: '100%', borderRadius: '2px' }}
             />
           </div>
 
@@ -188,8 +179,16 @@ export function WorkflowAutomation({
             <select
               value={selectedRegionFilter}
               onChange={(e) => setSelectedRegionFilter(e.target.value)}
-              className="form-select"
-              style={{ width: '160px' }}
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-primary)',
+                borderRadius: '2px',
+                padding: '8px 12px',
+                fontSize: '0.82rem',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
             >
               <option value="ALL">All 8 Regions</option>
               {AICTE_REGIONS.map(reg => (
@@ -199,8 +198,8 @@ export function WorkflowAutomation({
           )}
         </div>
 
-        <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
-          Showing <strong>{filteredApps.length}</strong> {isRole(Role.INSTITUTION) ? 'institutional' : 'regional'} applications
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          Showing <strong style={{ color: 'var(--text-primary)' }}>{filteredApps.length}</strong> {isRole(Role.INSTITUTION) ? 'institutional' : 'regional'} applications
         </div>
       </div>
 
@@ -214,11 +213,16 @@ export function WorkflowAutomation({
           return (
             <div 
               key={app.id} 
-              className="panel" 
               style={{ 
                 margin: 0,
-                borderLeft: `4px solid ${isOverdue ? '#ef4444' : routeInfo.color}`,
-                transition: 'all 0.2s ease'
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-subtle)',
+                borderLeft: `3px solid ${isOverdue ? 'var(--coral-500)' : '#0f172a'}`,
+                borderRadius: '2px',
+                padding: '20px 22px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                transition: 'all 0.2s ease',
+                animation: 'cardEnter 0.35s ease forwards'
               }}
             >
               {/* Card Header */}
@@ -231,49 +235,73 @@ export function WorkflowAutomation({
                 marginBottom: '16px'
               }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                     <span style={{ 
-                      fontSize: '1rem', 
-                      fontWeight: 800, 
-                      fontFamily: 'var(--font-display)', 
-                      color: '#38bdf8' 
+                      fontSize: '0.95rem', 
+                      fontWeight: 700, 
+                      letterSpacing: '0.04em',
+                      color: 'var(--text-primary)' 
                     }}>
                       {app.id}
                     </span>
-                    <span className="badge badge-info">{app.region} Region</span>
-                    <span className="badge" style={{ background: `${routeInfo.color}25`, color: routeInfo.color, border: `1px solid ${routeInfo.color}50` }}>
+                    <span className="status-pill status-neutral">{app.region} Region</span>
+                    <span 
+                      style={{ 
+                        fontSize: '0.7rem', 
+                        fontWeight: 600, 
+                        color: routeInfo.color, 
+                        background: `${routeInfo.color}14`, 
+                        border: `1px solid ${routeInfo.color}35`,
+                        padding: '2px 8px',
+                        borderRadius: '2px'
+                      }}
+                    >
                       {routeInfo.title}
                     </span>
                     {app.deficiencies && app.deficiencies.length > 0 && (
-                      <span className="badge badge-warning">
+                      <span className="status-pill status-warning">
                         <AlertTriangle size={12} /> {app.deficiencies.length} Deficiency Memo
                       </span>
                     )}
                   </div>
-                  <h3 style={{ fontSize: '1.15rem' }}>{app.instituteName}</h3>
-                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
-                    {app.city}, {app.state} • Type: <strong>{app.type}</strong> • Assigned: {app.assignedOfficer}
+                  <h3 style={{ fontSize: '1.12rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                    {app.instituteName}
+                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    {app.city}, {app.state} • Type: <strong style={{ color: 'var(--text-primary)' }}>{app.type}</strong> • Assigned: {app.assignedOfficer}
                   </div>
                 </div>
 
                 {/* SLA and Status Pill */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div className={`sla-pill ${isOverdue ? 'sla-breached' : 'sla-normal'}`}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div 
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '5px 10px',
+                      borderRadius: '2px',
+                      fontSize: '0.75rem',
+                      background: isOverdue ? 'rgba(255, 77, 106, 0.12)' : 'var(--bg-elevated)',
+                      border: `1px solid ${isOverdue ? 'rgba(255, 77, 106, 0.35)' : 'var(--border-subtle)'}`,
+                      color: isOverdue ? 'var(--coral-500)' : 'var(--text-secondary)'
+                    }}
+                  >
                     <Clock size={13} />
-                    <span>Stage Aging: <strong>{app.daysInCurrentStage} / {app.slaDays} Days</strong></span>
+                    <span>Stage Aging: <strong style={{ color: isOverdue ? 'var(--coral-500)' : 'var(--text-primary)' }}>{app.daysInCurrentStage} / {app.slaDays}d</strong></span>
                     {isOverdue && <span style={{ fontWeight: 800 }}>({app.daysInCurrentStage - app.slaDays}d overdue)</span>}
                   </div>
 
                   {app.escalationLevel > 0 && (
-                    <span className="badge badge-critical">
-                      Level {app.escalationLevel} Escalated
+                    <span className="status-pill status-danger">
+                      L{app.escalationLevel} Escalated
                     </span>
                   )}
                 </div>
               </div>
 
               {/* Progress Stepper for the Assigned Route */}
-              <div className="progress-stepper">
+              <div className="progress-stepper" style={{ margin: '14px 0 16px 0' }}>
                 <div className="stepper-track" />
                 {stages.map((stageName, idx) => {
                   const isCompleted = idx < app.stageIndex;
@@ -284,7 +312,7 @@ export function WorkflowAutomation({
                       className={`step-node ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
                     >
                       <div className="step-circle">
-                        {isCompleted ? <CheckCircle size={18} /> : idx + 1}
+                        {isCompleted ? <CheckCircle size={16} /> : idx + 1}
                       </div>
                       <span className="step-title">{stageName}</span>
                     </div>
@@ -295,32 +323,33 @@ export function WorkflowAutomation({
               {/* Deficiencies Note if present */}
               {app.deficiencies && app.deficiencies.length > 0 && (
                 <div style={{
-                  background: 'rgba(245, 158, 11, 0.08)',
-                  border: '1px solid rgba(245, 158, 11, 0.3)',
-                  borderRadius: '8px',
-                  padding: '12px 16px',
+                  background: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  borderRadius: '2px',
+                  padding: '12px 14px',
                   marginBottom: '16px',
                   fontSize: '0.78rem'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ fontWeight: 700, color: '#b45309', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <AlertTriangle size={14} /> Active Discrepancy / Deficiency Memo Recorded
                     </div>
                     {isRole(Role.INSTITUTION) && !app.deficiencies[0].resolved && (
                       <button 
-                        className="btn btn-warning btn-sm"
+                        className="btn-dark"
                         onClick={() => handleOpenRespondDeficiency(app)}
                         id={`btn-respond-def-${app.id}`}
+                        style={{ color: '#b45309', borderColor: '#fde68a', padding: '5px 10px', fontSize: '0.75rem', borderRadius: '2px' }}
                       >
-                        <Send size={13} /> Submit Rectification Response
+                        <Send size={13} /> Submit Response
                       </button>
                     )}
                   </div>
-                  <div style={{ color: '#cbd5e1', marginTop: '4px' }}>
-                    <strong>{app.deficiencies[0].clause}:</strong> {app.deficiencies[0].description}
+                  <div style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>{app.deficiencies[0].clause}:</strong> {app.deficiencies[0].description}
                   </div>
-                  <div style={{ color: '#94a3b8', marginTop: '4px' }}>
-                    Institutional response deadline: <strong>{app.deficiencies[0].rectificationDeadline}</strong>
+                  <div style={{ color: 'var(--text-muted)', marginTop: '4px' }}>
+                    Institutional response deadline: <strong style={{ color: 'var(--text-secondary)' }}>{app.deficiencies[0].rectificationDeadline}</strong>
                   </div>
                 </div>
               )}
@@ -337,28 +366,31 @@ export function WorkflowAutomation({
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button 
-                    className="btn btn-secondary btn-sm"
+                    className="btn-dark"
                     onClick={() => onSelectApplication(app)}
+                    style={{ padding: '6px 12px', fontSize: '0.78rem', borderRadius: '2px' }}
                   >
-                    <FileText size={14} /> Inspect Full Dossier
+                    <FileText size={13} /> Inspect Dossier
                   </button>
                   <button 
-                    className="btn btn-secondary btn-sm"
+                    className="btn-dark"
                     onClick={() => onOpenCaseSummary(app)}
+                    style={{ padding: '6px 12px', fontSize: '0.78rem', borderRadius: '2px' }}
                   >
-                    <FileCheck size={14} /> Electronic Case Summary
+                    <FileCheck size={13} /> Case Summary
                   </button>
 
                   {/* Reassign Region (Bureau Head only) */}
                   {canReassign && (
                     <button
-                      className="btn btn-secondary btn-sm"
+                      className="btn-dark"
                       onClick={() => {
                         setReassignModalApp(app);
                         setTargetRegion(app.region === 'WRO' ? 'SRO' : 'WRO');
                       }}
                       title="Reassign application to another AICTE Regional Office to balance workload"
                       id={`btn-reassign-${app.id}`}
+                      style={{ padding: '6px 12px', fontSize: '0.78rem', borderRadius: '2px' }}
                     >
                       <MapPin size={13} /> Reassign Region
                     </button>
@@ -370,21 +402,22 @@ export function WorkflowAutomation({
                   {app.stageIndex < stages.length - 1 && (
                     canRevert ? (
                       <button 
-                        className="btn btn-warning btn-sm"
+                        className="btn-dark"
                         onClick={() => handleOpenDeficiency(app)}
                         title="Issue Deficiency Memo and return to institution for clarifications"
                         id={`btn-revert-${app.id}`}
+                        style={{ color: '#b45309', borderColor: '#fde68a', padding: '6px 12px', fontSize: '0.78rem', borderRadius: '2px' }}
                       >
-                        <RotateCcw size={14} /> Revert for Deficiencies
+                        <RotateCcw size={13} /> Revert for Deficiencies
                       </button>
                     ) : (
                       <button 
-                        className="btn btn-secondary btn-sm"
+                        className="btn-dark"
                         disabled
-                        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                        style={{ opacity: 0.4, cursor: 'not-allowed', padding: '6px 12px', fontSize: '0.78rem', borderRadius: '2px' }}
                         title={getRestrictionReason(Permission.REVERT_WITH_DEFICIENCY)}
                       >
-                        <RotateCcw size={14} /> Revert for Deficiencies
+                        <RotateCcw size={13} /> Revert for Deficiencies
                       </button>
                     )
                   )}
@@ -393,27 +426,28 @@ export function WorkflowAutomation({
                   {app.stageIndex < stages.length - 1 ? (
                     canAdvance ? (
                       <button 
-                        className="btn btn-primary btn-sm"
+                        className="btn-mint"
                         onClick={() => onProgressStage(app.id)}
                         id={`btn-progress-${app.id}`}
+                        style={{ padding: '7px 14px', fontSize: '0.78rem', borderRadius: '2px' }}
                       >
                         <span>Approve & Progress to {stages[app.stageIndex + 1]}</span>
-                        <ArrowRight size={14} />
+                        <ArrowRight size={13} />
                       </button>
                     ) : (
                       <button 
-                        className="btn btn-secondary btn-sm"
+                        className="btn-dark"
                         disabled
-                        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                        style={{ opacity: 0.4, cursor: 'not-allowed', padding: '7px 14px', fontSize: '0.78rem', borderRadius: '2px' }}
                         title={getRestrictionReason(Permission.ADVANCE_APPLICATION_STAGE)}
                       >
                         <span>Approve & Progress to {stages[app.stageIndex + 1]}</span>
-                        <ArrowRight size={14} />
+                        <ArrowRight size={13} />
                       </button>
                     )
                   ) : (
-                    <span className="badge badge-success" style={{ padding: '6px 14px' }}>
-                      <CheckCircle size={14} /> Final Order Issued
+                    <span className="status-pill status-compliant" style={{ padding: '6px 12px', borderRadius: '2px' }}>
+                      <CheckCircle size={13} /> Final Order Issued
                     </span>
                   )}
                 </div>
@@ -425,37 +459,54 @@ export function WorkflowAutomation({
 
       {/* Deficiency Revert Modal (RO) */}
       {deficiencyModalApp && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <RotateCcw size={20} color="#fbbf24" /> Authorized Return / Revert with Deficiency Memo
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setDeficiencyModalApp(null); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '580px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline" style={{ color: 'var(--amber-500)' }}>REGIONAL SCRUTINY ACTION</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  Return with Deficiency Memo
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setDeficiencyModalApp(null)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleSubmitDeficiency}>
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
-                padding: '12px 16px',
-                borderRadius: '8px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                padding: '12px 14px',
+                borderRadius: '2px',
                 marginBottom: '16px',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)'
               }}>
-                <div><strong>Application:</strong> {deficiencyModalApp.id}</div>
-                <div><strong>Institution:</strong> {deficiencyModalApp.instituteName}</div>
-                <div><strong>Current Stage:</strong> {deficiencyModalApp.currentStage}</div>
+                <div><strong>Application:</strong> <span style={{ color: 'var(--text-primary)' }}>{deficiencyModalApp.id}</span></div>
+                <div><strong>Institution:</strong> <span style={{ color: 'var(--text-primary)' }}>{deficiencyModalApp.instituteName}</span></div>
+                <div><strong>Current Stage:</strong> <span style={{ color: 'var(--text-primary)' }}>{deficiencyModalApp.currentStage}</span></div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Applicable APH Regulation / Clause:</label>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Applicable APH Regulation / Clause:
+                </label>
                 <select 
-                  className="form-select"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={deficiencyClause}
                   onChange={(e) => setDeficiencyClause(e.target.value)}
                 >
@@ -467,10 +518,22 @@ export function WorkflowAutomation({
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Detailed Deficiency Description & Mandatory Rectification Requirement:</label>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Detailed Deficiency Description & Rectification Requirement:
+                </label>
                 <textarea 
-                  className="form-textarea"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '10px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
                   value={deficiencyDescription}
                   onChange={(e) => setDeficiencyDescription(e.target.value)}
                   placeholder="Specify exact shortfall, missing documents, or physical deficiencies requiring compliance..."
@@ -479,10 +542,21 @@ export function WorkflowAutomation({
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Prescribed Rectification Window (Days):</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Prescribed Rectification Window:
+                </label>
                 <select 
-                  className="form-select"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={cureDays}
                   onChange={(e) => setCureDays(e.target.value)}
                 >
@@ -495,16 +569,18 @@ export function WorkflowAutomation({
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn btn-secondary"
+                  className="btn-dark"
                   onClick={() => setDeficiencyModalApp(null)}
+                  style={{ borderRadius: '2px' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-warning"
+                  className="btn-dark"
+                  style={{ color: '#b45309', borderColor: '#fde68a', borderRadius: '2px' }}
                 >
-                  <Send size={15} /> Issue Deficiency Memo & Revert
+                  <Send size={14} /> Issue Deficiency Memo
                 </button>
               </div>
             </form>
@@ -514,37 +590,55 @@ export function WorkflowAutomation({
 
       {/* Institution Respond to Deficiency Modal */}
       {respondModalApp && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <UploadCloud size={20} color="#38bdf8" /> Submit Institutional Rectification Response
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setRespondModalApp(null); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '580px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline">INSTITUTIONAL COMPLIANCE</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  Submit Rectification Response
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setRespondModalApp(null)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '2px' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleSubmitResponse}>
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
-                padding: '12px 16px',
-                borderRadius: '8px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                padding: '12px 14px',
+                borderRadius: '2px',
                 marginBottom: '16px',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)'
               }}>
-                <div><strong>Application:</strong> {respondModalApp.id}</div>
-                <div><strong>Recorded Discrepancy:</strong> {respondModalApp.deficiencies?.[0]?.description}</div>
-                <div><strong>Norm Reference:</strong> {respondModalApp.deficiencies?.[0]?.clause}</div>
+                <div><strong>Application:</strong> <span style={{ color: 'var(--text-primary)' }}>{respondModalApp.id}</span></div>
+                <div><strong>Recorded Discrepancy:</strong> <span style={{ color: 'var(--text-primary)' }}>{respondModalApp.deficiencies?.[0]?.description}</span></div>
+                <div><strong>Norm Reference:</strong> <span style={{ color: 'var(--text-primary)' }}>{respondModalApp.deficiencies?.[0]?.clause}</span></div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Institutional Clarification & Compliance Statement:</label>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Institutional Clarification & Compliance Statement:
+                </label>
                 <textarea 
-                  className="form-textarea"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '10px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
                   value={responseText}
                   onChange={(e) => setResponseText(e.target.value)}
                   rows={4}
@@ -552,11 +646,22 @@ export function WorkflowAutomation({
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Attached Rectification Evidence File (PDF):</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Attached Evidence Document (PDF):
+                </label>
                 <input 
                   type="text"
-                  className="form-input"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={responseFile}
                   onChange={(e) => setResponseFile(e.target.value)}
                   required
@@ -566,16 +671,18 @@ export function WorkflowAutomation({
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn btn-secondary"
+                  className="btn-dark"
                   onClick={() => setRespondModalApp(null)}
+                  style={{ borderRadius: '2px' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-primary"
+                  className="btn-mint"
+                  style={{ borderRadius: '2px' }}
                 >
-                  <Send size={15} /> Submit for Regional Officer Re-Scrutiny
+                  <Send size={14} /> Submit for Re-Scrutiny
                 </button>
               </div>
             </form>
@@ -585,37 +692,54 @@ export function WorkflowAutomation({
 
       {/* Reassign Region Modal (Bureau Head) */}
       {reassignModalApp && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="panel-header">
-              <h3 className="panel-title">
-                <MapPin size={20} color="#c084fc" /> Reassign Application Jurisdiction
-              </h3>
+        <div className="modal-backdrop-clean" onClick={(e) => { if (e.target === e.currentTarget) setReassignModalApp(null); }}>
+          <div className="modal-sheet-clean" style={{ maxWidth: '540px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+              <div>
+                <div className="page-overline">HEADQUARTERS WORKLOAD BALANCING</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+                  Reassign Regional Jurisdiction
+                </h3>
+              </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn-dark"
                 onClick={() => setReassignModalApp(null)}
+                style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '2px' }}
               >
-                ✕ Close
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleConfirmReassign}>
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
-                padding: '12px 16px',
-                borderRadius: '8px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
+                padding: '12px 14px',
+                borderRadius: '2px',
                 marginBottom: '16px',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)'
               }}>
-                <div><strong>Application:</strong> {reassignModalApp.id}</div>
-                <div><strong>Institution:</strong> {reassignModalApp.instituteName}</div>
-                <div><strong>Current Region:</strong> {reassignModalApp.region}</div>
+                <div><strong>Application:</strong> <span style={{ color: 'var(--text-primary)' }}>{reassignModalApp.id}</span></div>
+                <div><strong>Institution:</strong> <span style={{ color: 'var(--text-primary)' }}>{reassignModalApp.instituteName}</span></div>
+                <div><strong>Current Region:</strong> <span style={{ color: 'var(--text-primary)' }}>{reassignModalApp.region}</span></div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Transfer / Reassign to Target AICTE Regional Office:</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Target AICTE Regional Office:
+                </label>
                 <select 
-                  className="form-select"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '2px',
+                    padding: '8px 12px',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   value={targetRegion}
                   onChange={(e) => setTargetRegion(e.target.value)}
                 >
@@ -630,15 +754,16 @@ export function WorkflowAutomation({
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn btn-secondary"
+                  className="btn-dark"
                   onClick={() => setReassignModalApp(null)}
+                  style={{ borderRadius: '2px' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-primary"
-                  style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
+                  className="btn-mint"
+                  style={{ borderRadius: '2px' }}
                 >
                   Confirm Reassignment
                 </button>
