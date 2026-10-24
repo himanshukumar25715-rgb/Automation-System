@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { 
   ReactFlow, 
   Background, 
@@ -787,29 +787,131 @@ export function RealtimeGraphFlow({
     return { initialNodes: nodes, initialEdges: edges };
   }, [currentRoleType, applications, selectedRoute, currentUser, handleNodeClick]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  // Unique storage key per role and route
+  const storageKey = useMemo(() => {
+    return `govverify_engine_positions_${currentRoleType}_${selectedRoute}`;
+  }, [currentRoleType, selectedRoute]);
+
+  // Load custom node coordinates from localStorage
+  const [customPositions, setCustomPositions] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`govverify_engine_positions_${currentRoleType}_${selectedRoute}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Reload custom positions when role or route changes
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      setCustomPositions(saved ? JSON.parse(saved) : {});
+    } catch {
+      setCustomPositions({});
+    }
+  }, [storageKey]);
+
+  // Initialize nodes with custom positions applied if any
+  const [nodes, setNodes, onNodesChange] = useNodesState(() => {
+    return initialNodes.map(node => {
+      const savedPos = customPositions[node.id];
+      if (savedPos && typeof savedPos.x === 'number' && typeof savedPos.y === 'number') {
+        return { ...node, position: { ...savedPos } };
+      }
+      return node;
+    });
+  });
+
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   // Update nodes and edges whenever initialNodes/initialEdges recalculate
+  // CRITICAL: NEVER overwrite user's custom dragged positions on internal re-renders/data updates!
   useEffect(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-  }, [initialNodes, initialEdges, setNodes, setEdges]);
+    setNodes(prevNodes => {
+      return initialNodes.map(newNode => {
+        const existingNode = prevNodes.find(n => n.id === newNode.id);
+        const savedPos = customPositions[newNode.id];
+        
+        let targetPosition = newNode.position;
+        if (savedPos && typeof savedPos.x === 'number' && typeof savedPos.y === 'number') {
+          targetPosition = savedPos;
+        } else if (existingNode && existingNode.position) {
+          targetPosition = existingNode.position;
+        }
 
-  // Fit view when instance is ready or expanded
+        return {
+          ...newNode,
+          position: targetPosition
+        };
+      });
+    });
+    setEdges(initialEdges);
+  }, [initialNodes, initialEdges, customPositions, setNodes, setEdges]);
+
+  // Save node position when user drags and releases a node
+  const handleNodeDragStop = useCallback((event, node) => {
+    const newPos = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
+    setCustomPositions(prev => {
+      const next = { ...prev, [node.id]: newPos };
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch (e) {
+        console.warn('Failed to save node position:', e);
+      }
+      return next;
+    });
+  }, [storageKey]);
+
+  // Check if custom layout has been placed by the user
+  const hasCustomLayout = Object.keys(customPositions).length > 0;
+
+  // Fit view only once on initial mount, or when explicitly requested
+  const hasInitializedFitView = useRef(false);
   useEffect(() => {
-    if (reactFlowInstance) {
+    if (reactFlowInstance && !hasInitializedFitView.current) {
+      hasInitializedFitView.current = true;
       setTimeout(() => {
         reactFlowInstance.fitView({ padding: 0.15, duration: 400 });
       }, 100);
     }
-  }, [reactFlowInstance, isExpanded, currentRoleType, selectedRoute]);
+  }, [reactFlowInstance]);
 
-  const handleResetView = () => {
+  // Fit view when expanding or collapsing canvas
+  useEffect(() => {
+    if (reactFlowInstance && hasInitializedFitView.current) {
+      setTimeout(() => {
+        reactFlowInstance.fitView({ padding: 0.15, duration: 300 });
+      }, 150);
+    }
+  }, [isExpanded, reactFlowInstance]);
+
+  // Dedicated Reset Layout: Only when clicked by user, resets positions back to clean default
+  const handleResetLayout = useCallback(() => {
+    try {
+      localStorage.removeItem(storageKey);
+    } catch (e) {
+      console.warn('Failed to remove custom layout:', e);
+    }
+    setCustomPositions({});
+    // Reset all nodes to original pristine initial coordinates
+    setNodes(initialNodes.map(node => ({
+      ...node,
+      position: { ...node.position }
+    })));
+    if (reactFlowInstance) {
+      setTimeout(() => {
+        reactFlowInstance.fitView({ padding: 0.15, duration: 400 });
+      }, 50);
+    }
+  }, [storageKey, initialNodes, setNodes, reactFlowInstance]);
+
+  // Viewport centering only
+  const handleFitView = useCallback(() => {
     if (reactFlowInstance) {
       reactFlowInstance.fitView({ padding: 0.15, duration: 400 });
     }
-  };
+  }, [reactFlowInstance]);
 
   return (
     <div className={`realtime-graph-container ${isExpanded ? 'expanded' : ''}`}>
@@ -866,15 +968,46 @@ export function RealtimeGraphFlow({
             </div>
           )}
 
-          {/* Reset Zoom Button */}
+          {/* Fit View Button */}
           <button 
             className="btn-dark"
-            onClick={handleResetView}
+            onClick={handleFitView}
             style={{ padding: '6px 10px', fontSize: '0.75rem', borderRadius: '2px' }}
-            title="Reset Graph Zoom & Fit View"
+            title="Center canvas viewport without moving nodes"
+            id="btn-graph-fit-view"
+          >
+            <span>Fit View</span>
+          </button>
+
+          {/* Reset Layout Button (Only resets node places when clicked) */}
+          <button 
+            className="btn-dark"
+            onClick={handleResetLayout}
+            style={{ 
+              padding: '6px 10px', 
+              fontSize: '0.75rem', 
+              borderRadius: '2px',
+              borderColor: hasCustomLayout ? 'var(--brand-accent)' : undefined,
+              color: hasCustomLayout ? 'var(--brand-accent)' : undefined,
+              fontWeight: hasCustomLayout ? 700 : 500
+            }}
+            title={hasCustomLayout ? "Reset custom node positions back to default layout" : "Layout is currently default"}
+            id="btn-graph-reset-layout"
           >
             <RotateCcw size={13} />
-            <span>Fit View</span>
+            <span>Reset Layout</span>
+            {hasCustomLayout && (
+              <span 
+                style={{ 
+                  width: '6px', 
+                  height: '6px', 
+                  borderRadius: '50%', 
+                  background: 'var(--brand-accent)', 
+                  display: 'inline-block' 
+                }} 
+                title="Custom positions active"
+              />
+            )}
           </button>
 
           {/* Expand/Collapse Canvas */}
@@ -897,6 +1030,7 @@ export function RealtimeGraphFlow({
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodeDragStop={handleNodeDragStop}
           nodeTypes={nodeTypes}
           onInit={setReactFlowInstance}
           fitView
