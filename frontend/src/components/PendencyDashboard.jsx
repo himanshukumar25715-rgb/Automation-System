@@ -14,6 +14,7 @@ import {
   Plus
 } from 'lucide-react';
 import { AICTE_REGIONS } from '../data/mockData';
+import { RealtimeGraphFlow } from './RealtimeGraphFlow';
 
 export function PendencyDashboard({ 
   applications, 
@@ -21,10 +22,13 @@ export function PendencyDashboard({
   leaseDocs, 
   onSelectApplication,
   onNavigateTab,
+  onProgressStage,
+  onOpenCaseSummary,
   currentRole
 }) {
   const [selectedRegionFilter, setSelectedRegionFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showGraphFlow, setShowGraphFlow] = useState(true);
 
   // Calculations
   const filteredApps = applications.filter(app => {
@@ -146,6 +150,17 @@ export function PendencyDashboard({
           </div>
         </div>
       </div>
+
+      {/* 2.5 Real-Time Workflow Graph Flow (Live Stage Dispatch & Routing) */}
+      <RealtimeGraphFlow
+        role={currentRole?.role}
+        currentUser={currentRole}
+        applications={applications}
+        onSelectApplication={onSelectApplication}
+        onProgressStage={onProgressStage}
+        onOpenCaseSummary={onOpenCaseSummary}
+        onNavigateTab={onNavigateTab}
+      />
 
       {/* 3. Section Header: RECENT APPLICATIONS & View all -> */}
       <div className="section-header-clean">

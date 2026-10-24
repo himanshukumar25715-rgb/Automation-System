@@ -721,6 +721,8 @@ export default function App() {
                 onOpenCaseSummary={(app) => setSummaryApp(app)}
                 onOpenUploadUndertaking={() => setActiveTab('undertakings')}
                 onOpenUploadLease={() => setActiveTab('documents')}
+                onSelectApplication={(app) => setInspectingApp(app)}
+                onProgressStage={handleProgressStage}
                 currentUser={currentUser}
               />
             ) : (
@@ -729,6 +731,8 @@ export default function App() {
                 undertakings={visibleUndertakings}
                 leaseDocs={visibleLeaseDocs}
                 onSelectApplication={(app) => setInspectingApp(app)}
+                onProgressStage={handleProgressStage}
+                onOpenCaseSummary={(app) => setSummaryApp(app)}
                 onNavigateTab={(tab) => setActiveTab(tab)}
                 currentRole={currentUser}
               />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Building2, 
   GraduationCap, 
@@ -13,9 +13,12 @@ import {
   Calendar, 
   FileCheck,
   AlertCircle,
-  Plus
+  Plus,
+  GitBranch,
+  Layers
 } from 'lucide-react';
 import { WORKFLOW_ROUTES } from '../data/mockData';
+import { RealtimeGraphFlow } from './RealtimeGraphFlow';
 
 export function InstitutionDashboard({ 
   applications, 
@@ -26,8 +29,11 @@ export function InstitutionDashboard({
   onOpenCaseSummary,
   onOpenUploadUndertaking,
   onOpenUploadLease,
+  onSelectApplication,
+  onProgressStage,
   currentUser 
 }) {
+  const [pipelineView, setPipelineView] = useState('flow');
   const myApp = applications[0] || {
     id: 'APP-2026-WRO-1049',
     instituteName: 'Maharashtra Institute of Technology & Research',
@@ -269,9 +275,54 @@ export function InstitutionDashboard({
         </div>
       )}
 
-      {/* 4. Active Approval Stage Pipeline Stepper */}
-      <div className="section-header-clean">
-        <span className="section-label">ACTIVE APPROVAL STAGE PIPELINE</span>
+      {/* 4. Active Approval Stage Pipeline & Real-Time Flow */}
+      <div className="section-header-clean" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span className="section-label" style={{ margin: 0 }}>ACTIVE APPROVAL STAGE PIPELINE</span>
+          <div style={{ display: 'inline-flex', background: 'var(--bg-tertiary)', padding: '2px', borderRadius: '2px', border: '1px solid var(--border-subtle)' }}>
+            <button
+              type="button"
+              onClick={() => setPipelineView('flow')}
+              style={{
+                border: 'none',
+                background: pipelineView === 'flow' ? '#0f172a' : 'transparent',
+                color: pipelineView === 'flow' ? '#ffffff' : 'var(--text-secondary)',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                padding: '4px 9px',
+                borderRadius: '2px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <GitBranch size={12} />
+              <span>Real-Time Flow Graph</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPipelineView('matrix')}
+              style={{
+                border: 'none',
+                background: pipelineView === 'matrix' ? '#0f172a' : 'transparent',
+                color: pipelineView === 'matrix' ? '#ffffff' : 'var(--text-secondary)',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                padding: '4px 9px',
+                borderRadius: '2px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Layers size={12} />
+              <span>Step Matrix</span>
+            </button>
+          </div>
+        </div>
+
         <button 
           className="section-link"
           onClick={() => onNavigateTab('applications')}
@@ -281,71 +332,83 @@ export function InstitutionDashboard({
         </button>
       </div>
 
-      <div className="panel-clean" style={{ borderRadius: '2px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-          <div>
-            <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '1rem' }}>
-              Application ID: {myApp.id}
-            </span>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-              Route: <strong>{routeInfo.title}</strong> • Stage {myApp.stageIndex} of {routeInfo.stages.length}
+      {pipelineView === 'flow' ? (
+        <RealtimeGraphFlow
+          role={currentUser?.role}
+          currentUser={currentUser}
+          applications={applications}
+          onSelectApplication={onSelectApplication}
+          onProgressStage={onProgressStage}
+          onOpenCaseSummary={onOpenCaseSummary}
+          onNavigateTab={onNavigateTab}
+        />
+      ) : (
+        <div className="panel-clean" style={{ borderRadius: '2px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+            <div>
+              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '1rem' }}>
+                Application ID: {myApp.id}
+              </span>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                Route: <strong>{routeInfo.title}</strong> • Stage {myApp.stageIndex} of {routeInfo.stages.length}
+              </div>
             </div>
+
+            <span className={`status-pill ${
+              myApp.status === 'Approved' ? 'mint' :
+              myApp.daysInCurrentStage > myApp.slaDays ? 'ruby' : 'cyan'
+            }`}>
+              {myApp.daysInCurrentStage > myApp.slaDays ? `SLA Breached (${myApp.daysInCurrentStage}d)` : myApp.status}
+            </span>
           </div>
 
-          <span className={`status-pill ${
-            myApp.status === 'Approved' ? 'mint' :
-            myApp.daysInCurrentStage > myApp.slaDays ? 'ruby' : 'cyan'
-          }`}>
-            {myApp.daysInCurrentStage > myApp.slaDays ? `SLA Breached (${myApp.daysInCurrentStage}d)` : myApp.status}
-          </span>
-        </div>
-
-        {/* Linear Stepper */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${routeInfo.stages.length}, 1fr)`,
-          gap: '10px'
-        }}>
-          {routeInfo.stages.map((st, idx) => {
-            const isCompleted = idx < myApp.stageIndex;
-            const isCurrent = idx === myApp.stageIndex;
-            return (
-              <div 
-                key={st}
-                style={{
-                  background: isCurrent ? '#0f172a' : isCompleted ? '#ffffff' : '#f8fafc',
-                  border: isCurrent ? '1px solid #0f172a' : isCompleted ? '1px solid #cbd5e1' : '1px solid var(--border-subtle)',
-                  borderRadius: '2px',
-                  padding: '12px 14px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
-                  boxShadow: isCurrent ? '0 2px 4px rgba(15, 23, 42, 0.15)' : 'none',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    color: isCurrent ? '#94a3b8' : isCompleted ? 'var(--emerald-600)' : 'var(--text-dim)'
+          {/* Linear Stepper */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${routeInfo.stages.length}, 1fr)`,
+            gap: '10px'
+          }}>
+            {routeInfo.stages.map((st, idx) => {
+              const isCompleted = idx < myApp.stageIndex;
+              const isCurrent = idx === myApp.stageIndex;
+              return (
+                <div 
+                  key={st}
+                  style={{
+                    background: isCurrent ? '#0f172a' : isCompleted ? '#ffffff' : '#f8fafc',
+                    border: isCurrent ? '1px solid #0f172a' : isCompleted ? '1px solid #cbd5e1' : '1px solid var(--border-subtle)',
+                    borderRadius: '2px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                    boxShadow: isCurrent ? '0 2px 4px rgba(15, 23, 42, 0.15)' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: isCurrent ? '#94a3b8' : isCompleted ? 'var(--emerald-600)' : 'var(--text-dim)'
+                    }}>
+                      STEP 0{idx + 1}
+                    </span>
+                    {isCompleted && <CheckCircle2 size={13} color="var(--emerald-600)" />}
+                  </div>
+                  <div style={{
+                    fontSize: '0.8rem',
+                    fontWeight: isCurrent ? 700 : 600,
+                    color: isCurrent ? '#ffffff' : isCompleted ? 'var(--text-main)' : 'var(--text-dim)'
                   }}>
-                    STEP 0{idx + 1}
-                  </span>
-                  {isCompleted && <CheckCircle2 size={13} color="var(--emerald-600)" />}
+                    {st}
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: '0.8rem',
-                  fontWeight: isCurrent ? 700 : 600,
-                  color: isCurrent ? '#ffffff' : isCompleted ? 'var(--text-main)' : 'var(--text-dim)'
-                }}>
-                  {st}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
