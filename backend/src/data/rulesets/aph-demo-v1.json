@@ -1,0 +1,93 @@
+{
+  "id": "aph-demo",
+  "version": "1.0.0",
+  "effectiveFrom": "2026-10-01",
+  "status": "DEMO",
+  "notice": "Prototype rule set. Parameters and clause references are configurable placeholders and are NOT official AICTE norms. Verify every rule against the applicable Approval Process Handbook before presenting it as authoritative.",
+  "parameters": {
+    "lowConfidenceThreshold": 0.8,
+    "sqmBuiltUpPerSanctionedSeat": 4,
+    "studentsPerFaculty": 20,
+    "landAreaTolerancePct": 1
+  },
+  "rules": [
+    {
+      "key": "R-DOC-01",
+      "title": "Mandatory fields present",
+      "clauseRef": "DEMO-DOC-01 (verify against APH)",
+      "severity": "critical",
+      "type": "required_fields",
+      "fields": [
+        { "docType": "APPLICATION_FORM", "field": "sanctionedIntake" },
+        { "docType": "APPLICATION_FORM", "field": "facultyCount" },
+        { "docType": "LAND_LEASE", "field": "landAreaSqm" },
+        { "docType": "LAND_LEASE", "field": "expiryDate" },
+        { "docType": "BUILDING_PLAN", "field": "builtUpAreaSqm" },
+        { "docType": "FIRE_NOC", "field": "expiryDate" }
+      ]
+    },
+    {
+      "key": "R-LEASE-01",
+      "title": "Land lease is valid",
+      "clauseRef": "DEMO-LEASE-01 (verify against APH)",
+      "severity": "critical",
+      "type": "date_not_expired",
+      "docType": "LAND_LEASE",
+      "field": "expiryDate",
+      "warnWithinDays": 90
+    },
+    {
+      "key": "R-FIRE-01",
+      "title": "Fire safety NOC is valid",
+      "clauseRef": "DEMO-FIRE-01 (verify against APH)",
+      "severity": "critical",
+      "type": "date_not_expired",
+      "docType": "FIRE_NOC",
+      "field": "expiryDate",
+      "warnWithinDays": 30
+    },
+    {
+      "key": "R-XDOC-LAND-01",
+      "title": "Land area matches across lease and site plan",
+      "clauseRef": "DEMO-XDOC-01 (verify against APH)",
+      "severity": "critical",
+      "type": "cross_doc_match",
+      "left": { "docType": "LAND_LEASE", "field": "landAreaSqm" },
+      "right": { "docType": "SITE_PLAN", "field": "landAreaSqm" },
+      "tolerancePctParam": "landAreaTolerancePct"
+    },
+    {
+      "key": "R-XDOC-INTAKE-01",
+      "title": "Sanctioned intake matches application and trust resolution",
+      "clauseRef": "DEMO-XDOC-02 (verify against APH)",
+      "severity": "major",
+      "type": "cross_doc_match",
+      "left": { "docType": "APPLICATION_FORM", "field": "sanctionedIntake" },
+      "right": { "docType": "TRUST_RESOLUTION", "field": "sanctionedIntake" },
+      "tolerancePct": 0
+    },
+    {
+      "key": "R-AREA-01",
+      "title": "Built-up area supports the applied intake",
+      "clauseRef": "DEMO-AREA-01 (verify against APH)",
+      "severity": "major",
+      "type": "min_ratio",
+      "actual": { "docType": "BUILDING_PLAN", "field": "builtUpAreaSqm" },
+      "basis": { "docType": "APPLICATION_FORM", "field": "sanctionedIntake" },
+      "perUnitParam": "sqmBuiltUpPerSanctionedSeat",
+      "unit": "sqm"
+    },
+    {
+      "key": "R-FAC-01",
+      "title": "Faculty count supports the applied intake",
+      "clauseRef": "DEMO-FAC-01 (verify against APH)",
+      "severity": "major",
+      "type": "min_ratio",
+      "actual": { "docType": "APPLICATION_FORM", "field": "facultyCount" },
+      "basis": { "docType": "APPLICATION_FORM", "field": "sanctionedIntake" },
+      "divideByParam": "studentsPerFaculty",
+      "roundUp": true,
+      "unit": "faculty"
+    }
+  ]
+}
