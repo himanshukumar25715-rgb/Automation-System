@@ -17,11 +17,20 @@ before(async () => {
 });
 after(() => server.close());
 
-const call = async (method, path, body) => {
-  const res = await fetch(base + path, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
-  return { status: res.status, body: await res.json() };
+const call = async (method, path, body, extraHeaders = {}) => {
+  const res = await fetch(base + path, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...extraHeaders },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  return { status: res.status, body: await res.json(), headers: res.headers };
 };
 const reset = () => call('POST', '/api/audit/demo/reset');
+const createSession = async (role, region) => {
+  const response = await call('POST', '/api/auth/demo-session', { role, region });
+  assert.equal(response.status, 200);
+  return response.headers.get('set-cookie').split(';')[0];
+};
 const AS_OF = '2026-10-25';
 
 test('AUDIT: seeded chain verifies; tamper is detected at the exact seq; reset restores it', async () => {
@@ -53,7 +62,8 @@ test('PREFLIGHT: inconsistent case is BLOCKED with evidence; unknown app is a st
   await reset();
   const r = await call('POST', '/api/applications/APP-2026-NRO-8821/preflight');
   assert.equal(r.body.data.readiness, 'BLOCKED');
-  const f = await call('GET', '/api/applications/APP-2026-NRO-8821/findings?outcome=FAIL&severity=critical');
+  const cookie = await createSession('BUREAU_HEAD');
+  const f = await call('GET', '/api/applications/APP-2026-NRO-8821/findings?outcome=FAIL&severity=critical', undefined, { Cookie: cookie });
   assert.ok(f.body.data.findings.length >= 1);
   assert.ok(f.body.data.findings.every(x => x.outcome === 'FAIL' && x.severity === 'critical'));
   const nf = await call('POST', '/api/applications/NOPE/preflight');
@@ -65,6 +75,7 @@ test('PREFLIGHT: inconsistent case is BLOCKED with evidence; unknown app is a st
 test('RESUBMIT: corrected values produce a field diff, resolve findings, and are audited', async () => {
   await reset();
   const id = 'APP-2026-NRO-8821';
+  const cookie = await createSession('BUREAU_HEAD');
   await call('POST', `/api/applications/${id}/preflight`);
   const r = await call('POST', `/api/applications/${id}/resubmit`, {
     note: 'Corrected area and intake',
@@ -81,7 +92,7 @@ test('RESUBMIT: corrected values produce a field diff, resolve findings, and are
   const resolved = d.findingDiff.resolved.map(x => x.ruleKey);
   assert.ok(resolved.includes('R-XDOC-LAND-01'));
   assert.ok(resolved.includes('R-XDOC-INTAKE-01'));
-  const versions = await call('GET', `/api/applications/${id}/versions`);
+  const versions = await call('GET', `/api/applications/${id}/versions`, undefined, { Cookie: cookie });
   assert.equal(versions.body.count, 2);
   assert.notEqual(versions.body.data[0].fieldsHash, versions.body.data[1].fieldsHash);
   assert.equal((await call('GET', '/api/audit/verify')).body.status, 'VALID');
@@ -137,7 +148,9 @@ test('FACULTY: ingesting a record never echoes the identifier; creating an overl
 test('EXISTING ENDPOINTS: original routes still work', async () => {
   await reset();
   assert.equal((await call('GET', '/api/health')).status, 200);
-  const apps = await call('GET', '/api/applications');
+  const session = await call('POST', '/api/auth/demo-session', { role: 'BUREAU_HEAD' });
+  const cookie = session.headers.get('set-cookie').split(';')[0];
+  const apps = await call('GET', '/api/applications', undefined, { Cookie: cookie });
   assert.equal(apps.body.count, 5);
   assert.equal((await call('GET', '/api/regions')).status, 200);
   assert.equal((await call('GET', '/api/escalations')).status, 200);

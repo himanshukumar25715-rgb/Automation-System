@@ -1,5 +1,6 @@
 import express from 'express';
 import { db } from '../data/store.js';
+import { requireDemoSession } from '../middleware/demoSession.js';
 import { apiError } from '../utils/http.js';
 
 const router = express.Router();
@@ -18,12 +19,36 @@ router.get('/verify', (req, res) => {
 });
 
 // GET /api/audit/events?applicationId=&limit=&offset=
-router.get('/events', (req, res) => {
+router.get('/events', requireDemoSession, (req, res) => {
+  const applicationId = req.query.applicationId;
+  if (typeof applicationId !== 'string' || applicationId.trim() === '') {
+    return apiError(
+      res,
+      400,
+      'VALIDATION_ERROR',
+      'applicationId is required to read audit events.',
+      { applicationId: 'required application ID' }
+    );
+  }
+
+  const application = db.getApplicationByIdForSession(applicationId, req.demoSession);
+  if (!application) {
+    return apiError(res, 404, 'APPLICATION_NOT_FOUND', 'Application not found');
+  }
+
   const limit = Math.min(Number(req.query.limit) || 50, 500);
   const offset = Number(req.query.offset) || 0;
-  let events = db.auditChain.events;
-  if (req.query.applicationId) events = events.filter(e => e.applicationId === req.query.applicationId);
-  res.json({ success: true, total: events.length, count: Math.min(limit, Math.max(events.length - offset, 0)), data: events.slice(offset, offset + limit) });
+  const events = db.auditChain.events.filter(event => event.applicationId === applicationId);
+  const data = events.slice(offset, offset + limit).map(({ seq, date, actor, applicationId: eventApplicationId, action, prevHash, hash }) => ({
+    seq,
+    date,
+    actor,
+    applicationId: eventApplicationId,
+    action,
+    prevHash,
+    hash
+  }));
+  res.json({ success: true, total: events.length, count: Math.min(limit, Math.max(events.length - offset, 0)), data });
 });
 
 // POST /api/audit/demo/tamper  { seq }  - DEMO ONLY: edits an event without recomputing hashes

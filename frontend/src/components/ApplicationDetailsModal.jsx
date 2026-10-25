@@ -16,14 +16,76 @@ import {
 import { WORKFLOW_ROUTES } from '../data/mockData';
 
 export function ApplicationDetailsModal({ 
+  applicationId,
   application, 
+  isLoading = false,
+  error = null,
+  onRetry,
+  onSessionExpired,
   onClose, 
   onProgressStage,
   onOpenCaseSummary 
 }) {
   const [activeTab, setActiveTab] = useState('overview');
 
-  if (!application) return null;
+  const isSessionExpired = error?.status === 401 || error?.code === 'DEMO_SESSION_REQUIRED';
+  const isNotFound = error?.status === 404;
+
+  if (isLoading || error || !application) {
+    return (
+      <div className="modal-backdrop-clean">
+        <div className="modal-sheet-clean" style={{ maxWidth: '620px', padding: '28px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px', marginBottom: '20px' }}>
+            <div>
+              <div className="page-overline">SYNTHETIC DEMO APPLICATION</div>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--text-main)', margin: '4px 0 2px 0' }}>Application detail</h3>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{applicationId}</div>
+            </div>
+            <button className="btn-icon-sq" onClick={onClose} style={{ borderRadius: '2px' }} aria-label="Close application detail">
+              <X size={15} />
+            </button>
+          </div>
+
+          {isLoading && (
+            <div className="empty-state-box" style={{ margin: 0 }}>
+              Loading synthetic application detail from the backend…
+            </div>
+          )}
+
+          {error && !isSessionExpired && !isNotFound && (
+            <div className="empty-state-box" style={{ margin: 0, borderColor: '#fecaca', color: '#991b1b' }}>
+              <strong>Application detail could not be loaded.</strong>
+              <div style={{ marginTop: '6px' }}>{error.message || 'The backend returned an unexpected error.'}</div>
+              <button className="btn-dark" style={{ marginTop: '14px' }} onClick={onRetry}>
+                Retry detail read
+              </button>
+            </div>
+          )}
+
+          {isSessionExpired && (
+            <div className="empty-state-box" style={{ margin: 0, borderColor: '#fed7aa', color: '#9a3412' }}>
+              <strong>Demo session expired.</strong>
+              <div style={{ marginTop: '6px' }}>Select a synthetic demo persona to continue reading scoped applications.</div>
+              <button className="btn-dark" style={{ marginTop: '14px' }} onClick={onSessionExpired}>
+                Select synthetic persona
+              </button>
+            </div>
+          )}
+
+          {isNotFound && (
+            <div className="empty-state-box" style={{ margin: 0 }}>
+              <strong>Application not found in the active demo scope.</strong>
+              <div style={{ marginTop: '6px' }}>The application may not exist or may be outside this session’s institution or region.</div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <button className="btn-dark" onClick={onClose} style={{ borderRadius: '2px' }}>Close</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const routeInfo = WORKFLOW_ROUTES[application.route] || WORKFLOW_ROUTES.SCRUTINY_EVC;
   const isOverdue = application.daysInCurrentStage > application.slaDays;
@@ -46,6 +108,9 @@ export function ApplicationDetailsModal({
                 {application.id}
               </span>
               <span className="status-pill purple">{application.region} Region</span>
+              <span className="status-pill" style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '2px' }}>
+                Synthetic Demo Record
+              </span>
               <span className="status-pill" style={{ background: `${routeInfo.color}14`, color: routeInfo.color, border: `1px solid ${routeInfo.color}35`, borderRadius: '2px' }}>
                 {routeInfo.title}
               </span>

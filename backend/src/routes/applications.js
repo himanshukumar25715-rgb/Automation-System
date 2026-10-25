@@ -1,27 +1,29 @@
 import express from 'express';
 import { db } from '../data/store.js';
+import { requireDemoSession } from '../middleware/demoSession.js';
 import { apiError } from '../utils/http.js';
 
 const router = express.Router();
 
-// GET /api/applications - Query by region, status, institutionId
-router.get('/', (req, res) => {
-  const { region, status, institutionId } = req.query;
-  const applications = db.getApplications({ region, status, institutionId });
+function requireScopedApplication(req, res, next) {
+  const application = db.getApplicationByIdForSession(req.params.id, req.demoSession);
+  if (!application) {
+    return apiError(res, 404, 'APPLICATION_NOT_FOUND', 'Application not found');
+  }
+  req.application = application;
+  return next();
+}
+
+// Read-only API-backed slice: scope comes from the synthetic demo session.
+router.get('/', requireDemoSession, (req, res) => {
+  const { status } = req.query;
+  const applications = db.getApplicationsForSession(req.demoSession, { status });
   res.json({
     success: true,
+    demoMode: true,
     count: applications.length,
     data: applications
   });
-});
-
-// GET /api/applications/:id - Fetch single application
-router.get('/:id', (req, res) => {
-  const app = db.getApplicationById(req.params.id);
-  if (!app) {
-    return res.status(404).json({ success: false, message: 'Application not found' });
-  }
-  res.json({ success: true, data: app });
 });
 
 // POST /api/applications/:id/advance - Advance to downstream stage
@@ -78,14 +80,14 @@ router.post('/:id/preflight', (req, res) => {
 });
 
 // GET /api/applications/:id/findings?severity=&outcome=&ruleKey=
-router.get('/:id/findings', (req, res) => {
+router.get('/:id/findings', requireDemoSession, requireScopedApplication, (req, res) => {
   const result = db.getFindings(req.params.id, req.query);
   if (!result) return apiError(res, 404, 'APPLICATION_NOT_FOUND', 'Application not found');
   res.json({ success: true, data: result });
 });
 
 // GET /api/applications/:id/versions - every submitted version of the extracted data
-router.get('/:id/versions', (req, res) => {
+router.get('/:id/versions', requireDemoSession, requireScopedApplication, (req, res) => {
   const versions = db.getFieldVersions(req.params.id);
   if (!versions) return apiError(res, 404, 'APPLICATION_NOT_FOUND', 'Application not found');
   res.json({
@@ -93,6 +95,16 @@ router.get('/:id/versions', (req, res) => {
     count: versions.length,
     data: versions.map(v => ({ version: v.version, fieldsHash: v.fieldsHash, createdAt: v.createdAt, note: v.note, submittedBy: v.submittedBy, fieldCount: v.fields.length }))
   });
+});
+
+// Keep the detail route after the more-specific GET subroutes above.
+// Scope is still derived exclusively from the synthetic demo session.
+router.get('/:id', requireDemoSession, (req, res) => {
+  const app = db.getApplicationByIdForSession(req.params.id, req.demoSession);
+  if (!app) {
+    return res.status(404).json({ success: false, message: 'Application not found' });
+  }
+  res.json({ success: true, demoMode: true, data: app });
 });
 
 // POST /api/applications/:id/resubmit - body: { fields:[{docType,field,value,page?,confidence?}], note?, actor? }

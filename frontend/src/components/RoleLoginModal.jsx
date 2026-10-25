@@ -19,11 +19,11 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
   const handleSelectInstitution = () => {
     onSelectRole({
       role: Role.INSTITUTION,
-      officer: 'Dr. Meera Sen',
-      designation: 'Principal & Head of Institute',
+      officer: 'Synthetic Institution Coordinator',
+      designation: 'Synthetic Demo Institution Coordinator',
       badge: 'Institution (Applicant)',
       institutionId: '1-748920141',
-      instituteName: 'Maharashtra Institute of Technology & Research',
+      instituteName: 'Synthetic Western Technical Institute',
       region: 'WRO',
     });
   };
@@ -32,9 +32,9 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
     const regObj = AICTE_REGIONS.find(r => r.code === selectedRegion) || AICTE_REGIONS[2];
     onSelectRole({
       role: Role.REGIONAL_OFFICER,
-      officer: `Dr. R.K. Patil (${regObj.code})`,
-      designation: `Regional Officer, AICTE ${regObj.name}`,
-      badge: `Regional Officer (${regObj.code})`,
+      officer: `Synthetic Regional Officer (${regObj.code})`,
+      designation: `Synthetic Demo Regional Officer, ${regObj.name}`,
+      badge: `Regional Officer (${regObj.code}, Synthetic Demo)`,
       region: regObj.code,
     });
   };
@@ -42,9 +42,9 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
   const handleSelectBureauHead = () => {
     onSelectRole({
       role: Role.BUREAU_HEAD,
-      officer: 'Shri A.K. Sharma',
-      designation: 'Adviser (Approval Bureau), AICTE HQ New Delhi',
-      badge: 'Bureau Head (HQ)',
+      officer: 'Synthetic Bureau Head',
+      designation: 'Synthetic Demo Bureau Head',
+      badge: 'Bureau Head (Synthetic Demo)',
       region: 'ALL',
     });
   };
@@ -62,7 +62,7 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
               Select Role Persona
             </h2>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Switch between AICTE role personas to evaluate strict data isolation, tailored sidebars, and approval permissions.
+              Switch between synthetic demo personas to evaluate server-enforced application read isolation.
             </p>
           </div>
 
@@ -109,7 +109,7 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
 
               <h3 style={{ fontSize: '1.15rem', color: 'var(--text-main)', marginBottom: '2px' }}>Institution</h3>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
-                Dr. Meera Sen, Principal
+                Synthetic Institution Coordinator
               </div>
 
               <div style={{
@@ -120,8 +120,8 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
                 fontSize: '0.76rem',
                 marginBottom: '14px'
               }}>
-                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Maharashtra Institute of Tech & Research</div>
-                <div style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>ID: 1-748920141 • Region: WRO</div>
+                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Synthetic Western Technical Institute</div>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>Synthetic scope • Region: WRO</div>
               </div>
 
               <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -181,7 +181,7 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
 
               <h3 style={{ fontSize: '1.15rem', color: 'var(--text-main)', marginBottom: '2px' }}>Regional Officer</h3>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
-                Dr. R.K. Patil, RO ({selectedRegion})
+                Synthetic Regional Officer ({selectedRegion})
               </div>
 
               <div style={{
@@ -262,7 +262,7 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
 
               <h3 style={{ fontSize: '1.15rem', color: 'var(--text-main)', marginBottom: '2px' }}>Bureau Head (Apex)</h3>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '14px' }}>
-                Shri A.K. Sharma, Adviser (Approval Bureau)
+                Synthetic Bureau Head
               </div>
 
               <div style={{
@@ -273,7 +273,7 @@ export function RoleLoginModal({ currentRole, onSelectRole, onClose, isOpen }) {
                 fontSize: '0.76rem',
                 marginBottom: '14px'
               }}>
-                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Approval Bureau • AICTE New Delhi</div>
+                <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Synthetic Approval Bureau demo scope</div>
                 <div style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>Full Jurisdiction: All 8 Regional Offices</div>
               </div>
 

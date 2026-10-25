@@ -1,28 +1,27 @@
 // GovVerify Client API Service Layer
-// Communicates with backend REST API via Vite proxy (/api) with graceful local fallback
+// Communicates with the backend REST API via the Vite proxy (/api).
 
 const API_BASE = '/api';
 
 async function request(endpoint, options = {}) {
-  try {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {})
-      },
-      ...options
-    });
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    },
+    ...options
+  });
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `API error ${res.status}`);
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.warn(`[API] Request to ${endpoint} failed, falling back to local simulation:`, err.message);
-    return null;
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    const error = new Error(errData.message || `API error ${res.status}`);
+    error.status = res.status;
+    error.code = errData.code;
+    throw error;
   }
+
+  return await res.json();
 }
 
 export const api = {
@@ -31,17 +30,32 @@ export const api = {
     return await request('/health');
   },
 
+  // Synthetic demo session. This is not production authentication.
+  createDemoSession: async ({ role, region } = {}) => {
+    const res = await request('/auth/demo-session', {
+      method: 'POST',
+      body: JSON.stringify({ role, region })
+    });
+    return res.data;
+  },
+
+  getDemoSession: async () => {
+    const res = await request('/auth/demo-session');
+    return res.data;
+  },
+
   // Applications
   getApplications: async (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     const url = `/applications${qs ? `?${qs}` : ''}`;
     const res = await request(url);
-    return res ? res.data : null;
+    return res.data;
   },
 
   getApplication: async (id) => {
-    const res = await request(`/applications/${id}`);
-    return res ? res.data : null;
+    if (!id) throw new Error('Application ID is required.');
+    const res = await request(`/applications/${encodeURIComponent(id)}`);
+    return res.data;
   },
 
   advanceApplication: async (id, { remarks, actor } = {}) => {

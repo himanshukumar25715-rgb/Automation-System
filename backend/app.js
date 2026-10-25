@@ -19,7 +19,8 @@ import rulesRouter from './src/routes/rules.js';
 const app = express();
 
 app.use(cors({
-  origin: '*', // development only: restrict to the real frontend origin before deployment
+  origin: true, // Local demo frontend only; do not use as production CORS policy.
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

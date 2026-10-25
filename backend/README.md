@@ -29,6 +29,21 @@ npm test
 npm start
 ```
 
+The local demo uses Node 22's built-in SQLite support. By default it creates
+`backend/data/govverify.sqlite`; override the location with `GOVVERIFY_DB_PATH`.
+Seed application records are inserted idempotently and are marked as synthetic
+demo data. The application read endpoints require a synthetic demo session.
+
+Focused read-slice check:
+
+```bash
+npm run check:application-reads
+```
+
+This verifies institution, regional officer, and bureau-head read scopes,
+query-parameter isolation, and availability after a backend restart. The demo
+session is not production authentication.
+
 ---
 
 ### Environment variables (all optional for the demo)
@@ -51,8 +66,8 @@ npm start
 ### Module A: Applications & Approval Workflow
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/applications` | Query applications by `region`, `status`, or `institutionId`. |
-| `GET` | `/api/applications/:id` | Get application dossier by ID. |
+| `GET` | `/api/applications` | Read applications within the active synthetic demo session scope. |
+| `GET` | `/api/applications/:id` | Get an in-scope application dossier by ID. |
 | `POST` | `/api/applications/:id/advance` | Advance application to next prescribed APH stage. |
 | `POST` | `/api/applications/:id/revert` | Return application with deficiency clause and start 7-day cure clock. |
 | `POST` | `/api/applications/:id/deficiency/:defId/remedy` | Submit institution remedy response evidence. |
@@ -87,13 +102,13 @@ npm start
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/audit/verify` | Recomputes the SHA-256 hash chain. Returns `VALID` (with `headHash`) or `BROKEN` with the `firstBrokenSeq`. |
-| `GET` | `/api/audit/events` | Chained audit events. Query: `applicationId`, `limit`, `offset`. |
+| `GET` | `/api/audit/events` | Requires a demo session and an authorized `applicationId`; optional `limit` and `offset`. Missing/invalid ID returns a validation error; unknown or out-of-scope applications return 404. Event totals are scoped to that application. |
 | `POST` | `/api/audit/demo/tamper` | **Demo only.** Body `{ "seq": 4 }` edits an event without recomputing hashes so `verify` can show detection. |
 | `POST` | `/api/audit/demo/reset` | **Demo only.** Rebuilds all in-memory state from seed data. Both demo routes are disabled when `NODE_ENV=production`. |
 | `GET` | `/api/rules/active` | The rule set in force (id, version, parameters, DEMO notice). |
 | `POST` | `/api/applications/:id/preflight` | Runs the versioned rules on the latest version of the extracted data. Returns findings with rule key, clause ref, severity, outcome, compared values and source pages. |
-| `GET` | `/api/applications/:id/findings` | Findings from the latest run. Query: `severity`, `outcome`, `ruleKey`. |
-| `GET` | `/api/applications/:id/versions` | Every submitted version (hash, time, note). |
+| `GET` | `/api/applications/:id/findings` | Requires a demo session with access to the application. Findings from the latest run. Query: `severity`, `outcome`, `ruleKey`. |
+| `GET` | `/api/applications/:id/versions` | Requires a demo session with access to the application. Every submitted version (hash, time, note). |
 | `POST` | `/api/applications/:id/resubmit` | Body `{ "fields": [{ "docType", "field", "value", "page?", "confidence?" }], "note?" }`. Fields are a **patch** over the last version (`value: null` removes one). Returns the field diff, which findings were resolved / newly raised / still open, and the new run. |
 | `GET` | `/api/faculty/conflicts` | Ghost Faculty Detector candidates, masked. Query: `institutionId`, `status` (`OPEN`, `DISMISSED`, `CONFIRMED_FOR_REVIEW`). |
 | `GET` | `/api/faculty/records` | Masked faculty records. |
@@ -101,6 +116,8 @@ npm start
 | `POST` | `/api/faculty/conflicts/:id/disposition` | Body `{ "decision": "DISMISSED" \| "CONFIRMED_FOR_REVIEW", "reason": "..." }`. A reason is mandatory and the action is audited. |
 
 New endpoints return structured errors: `{ success:false, code, message, fieldErrors?, requestId }`.
+
+These protections cover the three reads documented above only; other application and audit routes require separate authorization review.
 
 #### How the new pieces behave (be ready to explain these to judges)
 - **Audit chain:** every workflow action appends an event whose hash covers the previous event's hash, so editing any earlier event breaks everything after it. This is a *tamper-evident hash chain*, not a blockchain: someone who can rewrite the whole store and recompute every hash can still forge it, and deleting the last events is only detectable if `headHash` was recorded somewhere else.
@@ -119,6 +136,9 @@ New endpoints return structured errors: `{ success:false, code, message, fieldEr
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/auth/roles` | RBAC role definitions (Institution, Regional Officer, Bureau Head). |
+| `POST` | `/api/auth/demo-session` | Start an explicitly labelled synthetic demo session. |
+| `GET` | `/api/auth/demo-session` | Read the active synthetic demo session. |
+| `DELETE` | `/api/auth/demo-session` | Clear the synthetic demo session. |
 | `GET` | `/api/integrations` | Real-time connectivity status of DigiLocker, Land Records, e-Sign & SMS. |
 | `POST` | `/api/integrations/:id/sync` | Trigger verification sync with national e-Gov APIs. |
 | `GET` | `/api/reports/summary` | High-level national approval metrics and statutory compliance rate. |
