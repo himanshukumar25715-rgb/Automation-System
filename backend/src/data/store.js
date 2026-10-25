@@ -1,9 +1,24 @@
 // In-Memory Data Store & Business Mutators for AICTE PRAGATI-NAV Backend
 import { initialApplications, initialExperts, initialIntegrations } from './initialData.js';
 import { AICTE_REGIONS, APH_SLA_RULES, WORKFLOW_ROUTES } from '../config/constants.js';
+import { readFileSync } from 'node:fs';
+import { AuditChain } from '../services/auditChain.js';
+import { runPreflight } from '../services/rulesEngine.js';
+import { applyPatch, diffFields, diffFindings, hashFields } from '../services/diff.js';
+import { toStoredRecord, publicRecord, detectConflicts } from '../services/facultyDetector.js';
+import { preflightSeed } from './preflightSeed.js';
+import { facultySeed } from './facultySeed.js';
+
+const RULESET = JSON.parse(readFileSync(new URL('./rulesets/aph-demo-v1.json', import.meta.url), 'utf8'));
+const nowStamp = () => new Date().toISOString().replace('T', ' ').substring(0, 16);
 
 class DataStore {
   constructor() {
+    this.init();
+  }
+
+  // (Re)build all in-memory state from seed data. Also used by the demo reset.
+  init() {
     this.applications = JSON.parse(JSON.stringify(initialApplications));
     this.experts = JSON.parse(JSON.stringify(initialExperts));
     this.integrations = JSON.parse(JSON.stringify(initialIntegrations));
@@ -11,6 +26,49 @@ class DataStore {
     this.slaRules = { ...APH_SLA_RULES };
     this.workflowRoutes = { ...WORKFLOW_ROUTES };
     this.auditLogs = [];
+    this.auditChain = new AuditChain();
+    this.ruleset = RULESET;
+    this.fieldVersions = {}; // applicationId -> [{ version, fields, fieldsHash, ... }]
+    this.ruleRuns = {};      // applicationId -> [run, ...]
+    this.facultyRecords = facultySeed.map((r, i) => toStoredRecord(r, `FAC-${String(i + 1).padStart(4, '0')}`));
+    this.facultyDispositions = {}; // conflictId -> { decision, reason, actor, at }
+    this.seedAuditChain();
+  }
+
+  // ---- Audit (real SHA-256 hash chain) ------------------------------------
+  // Replays the seeded activity logs into the chain, in time order, so every
+  // entry gets a real hash and the full chain verifies from the first event.
+  seedAuditChain() {
+    const seeded = [];
+    this.applications.forEach(app => (app.auditTrail || []).forEach((entry, i) => seeded.push({ app, entry, i })));
+    seeded.sort((a, b) => (a.entry.date < b.entry.date ? -1 : a.entry.date > b.entry.date ? 1 : 0));
+    seeded.forEach(({ app, entry }) => this.sealEntry(app.id, entry));
+  }
+
+  sealEntry(applicationId, entry) {
+    const ev = this.auditChain.append({
+      date: entry.date,
+      actor: entry.actor,
+      applicationId,
+      action: entry.action
+    });
+    entry.seq = ev.seq;
+    entry.eventHash = ev.hash;
+    entry.hash = `sha256-${ev.hash.slice(0, 12)}`; // short form for display
+    return entry;
+  }
+
+  // Single entry point for every audit event: chains it, then adds it to the
+  // application's trail and the global log.
+  recordAudit(app, entry) {
+    const full = { date: nowStamp(), ...entry };
+    this.sealEntry(app ? app.id : null, full);
+    if (app) {
+      app.auditTrail = app.auditTrail || [];
+      app.auditTrail.push(full);
+    }
+    this.auditLogs.unshift({ ...full, appId: app ? app.id : null });
+    return full;
   }
 
   // Applications
@@ -52,11 +110,9 @@ class DataStore {
       const log = {
         date: new Date().toISOString().replace('T', ' ').substring(0, 16),
         actor,
-        action: `Advanced to "${nextStage}". ${remarks || ''}`.trim(),
-        hash: `sha256-${Math.random().toString(16).substring(2, 8)}`
+        action: `Advanced to "${nextStage}". ${remarks || ''}`.trim()
       };
-      app.auditTrail.push(log);
-      this.auditLogs.unshift({ ...log, appId: id });
+      this.recordAudit(app, log);
     }
     return app;
   }
@@ -82,11 +138,10 @@ class DataStore {
     const log = {
       date: new Date().toISOString().replace('T', ' ').substring(0, 16),
       actor,
-      action: `Returned under ${newDeficiency.clause}. 7-day cure window clock initiated.`,
-      hash: `sha256-${Math.random().toString(16).substring(2, 8)}`
+      action: `Returned under ${newDeficiency.clause}. 7-day cure window clock initiated.`
     };
-    app.auditTrail.push(log);
-    this.auditLogs.unshift({ ...log, appId: id });
+    this.recordAudit(app, log);
+    //this.auditLogs.unshift({ ...log, appId: id });
 
     return { app, deficiency: newDeficiency };
   }
@@ -106,10 +161,9 @@ class DataStore {
     const log = {
       date: new Date().toISOString().replace('T', ' ').substring(0, 16),
       actor,
-      action: `Deficiency remedy response submitted for ${def.clause}`,
-      hash: `sha256-${Math.random().toString(16).substring(2, 8)}`
+      action: `Deficiency remedy response submitted for ${def.clause}`
     };
-    app.auditTrail.push(log);
+    this.recordAudit(app, log);
     return { app, deficiency: def };
   }
 
@@ -144,11 +198,10 @@ class DataStore {
         u.status = 'Submitted (Under Review)';
         u.evidenceSubmitted = fileName || 'Certified_Evidence_Submission.pdf';
         u.remarks = remarks || 'Compliance proof uploaded.';
-        app.auditTrail.push({
+        this.recordAudit(app, {
           date: new Date().toISOString().replace('T', ' ').substring(0, 16),
           actor,
-          action: `Submitted compliance evidence for undertaking ${u.id}`,
-          hash: `sha256-${Math.random().toString(16).substring(2, 8)}`
+          action: `Submitted compliance evidence for undertaking ${u.id}`
         });
         return u;
       }
@@ -164,11 +217,10 @@ class DataStore {
         u.verifiedBy = actor;
         u.verifiedDate = new Date().toISOString().split('T')[0];
         u.verificationRemarks = remarks || '';
-        app.auditTrail.push({
+        this.recordAudit(app, {
           date: new Date().toISOString().replace('T', ' ').substring(0, 16),
           actor,
-          action: `Undertaking ${u.id} ${approved ? 'verified and closed' : 'marked non-compliant'}`,
-          hash: `sha256-${Math.random().toString(16).substring(2, 8)}`
+          action: `Undertaking ${u.id} ${approved ? 'verified and closed' : 'marked non-compliant'}`
         });
         return u;
       }
@@ -205,11 +257,10 @@ class DataStore {
         doc.status = 'Renewal Submitted';
         doc.uploadedFile = fileName || 'Registered_Lease_Extension_Deed.pdf';
         doc.daysToExpiry = Math.max(365, doc.daysToExpiry + 365);
-        app.auditTrail.push({
+        this.recordAudit(app, {
           date: new Date().toISOString().replace('T', ' ').substring(0, 16),
           actor,
-          action: `Renewal deed uploaded for ${doc.type} (${doc.documentNo})`,
-          hash: `sha256-${Math.random().toString(16).substring(2, 8)}`
+          action: `Renewal deed uploaded for ${doc.type} (${doc.documentNo})`
         });
         return doc;
       }
@@ -246,10 +297,9 @@ class DataStore {
     const log = {
       date: new Date().toISOString().replace('T', ' ').substring(0, 16),
       actor,
-      action: `Scheduled 3-member EVC for ${app.evcDetails.visitDate}. 48h report clock initialized.`,
-      hash: `sha256-${Math.random().toString(16).substring(2, 8)}`
+      action: `Scheduled 3-member EVC for ${app.evcDetails.visitDate}. 48h report clock initialized.`
     };
-    app.auditTrail.push(log);
+    this.recordAudit(app, log);
     return app;
   }
 
@@ -266,14 +316,129 @@ class DataStore {
     const log = {
       date: new Date().toISOString().replace('T', ' ').substring(0, 16),
       actor,
-      action: `EVC Inspection Report uploaded: ${outcome}. Ready for Council Approval.`,
-      hash: `sha256-${Math.random().toString(16).substring(2, 8)}`
+      action: `EVC Inspection Report uploaded: ${outcome}. Ready for Council Approval.`
     };
-    app.auditTrail.push(log);
+    this.recordAudit(app, log);
     return app;
   }
 
-  // Escalations
+  // ---- Pre-flight rules, versions and deficiency diff ----------------------
+  getFieldVersions(appId) {
+    if (!this.getApplicationById(appId)) return null;
+    if (!this.fieldVersions[appId]) {
+      const fields = (preflightSeed[appId] || []).map(f => ({ ...f }));
+      this.fieldVersions[appId] = [
+        { version: 1, fields, fieldsHash: hashFields(fields), createdAt: new Date().toISOString(), note: 'Initial submission', submittedBy: 'Applicant Institution' }
+      ];
+    }
+    return this.fieldVersions[appId];
+  }
+
+  latestVersion(appId) {
+    const versions = this.getFieldVersions(appId);
+    return versions ? versions[versions.length - 1] : null;
+  }
+
+  latestRun(appId) {
+    const runs = this.ruleRuns[appId];
+    return runs && runs.length ? runs[runs.length - 1] : null;
+  }
+
+  runPreflightFor(appId, { asOf, actor = 'Applicant Institution' } = {}) {
+    const app = this.getApplicationById(appId);
+    if (!app) return null;
+    const version = this.latestVersion(appId);
+    const asOfDate = asOf ? new Date(asOf) : process.env.DEMO_AS_OF ? new Date(process.env.DEMO_AS_OF) : new Date();
+    const run = runPreflight({ applicationId: appId, fields: version.fields, ruleset: this.ruleset, asOf: asOfDate });
+    const stored = { runId: `RUN-${appId}-${(this.ruleRuns[appId] || []).length + 1}`, applicationVersion: version.version, executedAt: new Date().toISOString(), ...run };
+    (this.ruleRuns[appId] = this.ruleRuns[appId] || []).push(stored);
+    this.recordAudit(app, {
+      actor,
+      action: `Pre-flight check run on v${version.version} (ruleset ${run.rulesetId} ${run.rulesetVersion}): ${run.summary.pass} pass, ${run.summary.fail} fail, ${run.summary.needsReview} need review. Readiness: ${run.readiness}.`
+    });
+    return stored;
+  }
+
+  getFindings(appId, { severity, outcome, ruleKey } = {}) {
+    if (!this.getApplicationById(appId)) return null;
+    const run = this.latestRun(appId) || this.runPreflightFor(appId, { actor: 'System Pre-flight' });
+    let findings = run.findings;
+    if (severity) findings = findings.filter(f => f.severity === severity);
+    if (outcome) findings = findings.filter(f => f.outcome === outcome.toUpperCase());
+    if (ruleKey) findings = findings.filter(f => f.ruleKey === ruleKey);
+    return { runId: run.runId, applicationVersion: run.applicationVersion, rulesetVersion: run.rulesetVersion, readiness: run.readiness, summary: run.summary, findings };
+  }
+
+  // Create a new version from a patch of corrected fields, diff it against the
+  // previous version, re-run the rules, and report which findings changed.
+  resubmit(appId, { fields, note, actor = 'Applicant Institution', asOf }) {
+    const app = this.getApplicationById(appId);
+    if (!app) return null;
+    if (!this.latestRun(appId)) this.runPreflightFor(appId, { asOf, actor: 'System Pre-flight' });
+    const prevRun = this.latestRun(appId);
+    const prev = this.latestVersion(appId);
+
+    const nextFields = applyPatch(prev.fields, fields);
+    const fieldDiff = diffFields(prev.fields, nextFields);
+    const version = {
+      version: prev.version + 1,
+      fields: nextFields,
+      fieldsHash: hashFields(nextFields),
+      createdAt: new Date().toISOString(),
+      note: note || 'Resubmission',
+      submittedBy: actor
+    };
+    this.fieldVersions[appId].push(version);
+
+    const nextRun = this.runPreflightFor(appId, { asOf, actor: 'System Pre-flight' });
+    const findingDiff = diffFindings(prevRun, nextRun);
+    if (app.status === 'Returned for Deficiency' && findingDiff.newlyRaised.length === 0) app.status = 'In Progress';
+    this.recordAudit(app, {
+      actor,
+      action: `Resubmitted as v${version.version}: ${fieldDiff.totalChanges} field change(s); ${findingDiff.resolved.length} finding(s) resolved, ${findingDiff.newlyRaised.length} newly raised, ${findingDiff.stillOpen.length} still open.`
+    });
+    return { version: version.version, fieldsHash: version.fieldsHash, fieldDiff, findingDiff, run: nextRun };
+  }
+
+  // ---- Faculty conflicts -----------------------------------------------------
+  institutionName(instituteId) {
+    const app = this.applications.find(a => a.instituteId === instituteId);
+    return app ? app.instituteName : instituteId;
+  }
+
+  addFacultyRecord(input) {
+    const id = `FAC-${String(this.facultyRecords.length + 1).padStart(4, '0')}`;
+    const rec = toStoredRecord({ ...input, synthetic: input.synthetic }, id);
+    this.facultyRecords.push(rec);
+    return publicRecord(rec);
+  }
+
+  getFacultyRecords({ institutionId } = {}) {
+    const list = institutionId ? this.facultyRecords.filter(r => r.institutionId === institutionId) : this.facultyRecords;
+    return list.map(publicRecord);
+  }
+
+  getFacultyConflicts({ institutionId, status, asOf } = {}) {
+    let list = detectConflicts(this.facultyRecords, { asOf: asOf ? new Date(asOf) : new Date(), institutionName: id => this.institutionName(id) });
+    list = list.map(c => ({ ...c, status: this.facultyDispositions[c.id] ? this.facultyDispositions[c.id].decision : 'OPEN', disposition: this.facultyDispositions[c.id] || null }));
+    if (institutionId) list = list.filter(c => c.institutions.some(i => i.institutionId === institutionId));
+    if (status) list = list.filter(c => c.status === status.toUpperCase());
+    return list;
+  }
+
+  recordFacultyDisposition(conflictId, { decision, reason, actor = 'Scrutiny Officer' }) {
+    const conflict = this.getFacultyConflicts().find(c => c.id === conflictId);
+    if (!conflict) return null;
+    const disposition = { decision, reason, actor, at: new Date().toISOString() };
+    this.facultyDispositions[conflictId] = disposition;
+    this.recordAudit(null, {
+      actor,
+      action: `Faculty conflict candidate ${conflictId} (${conflict.label}) marked ${decision}. Reason: ${reason}`
+    });
+    return { ...conflict, status: decision, disposition };
+  }
+
+  // ---- Escalations
   getEscalations() {
     const list = [];
     this.applications.forEach(app => {
