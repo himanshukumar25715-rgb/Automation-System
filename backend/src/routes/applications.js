@@ -5,6 +5,15 @@ import { apiError } from '../utils/http.js';
 
 const router = express.Router();
 
+function requireScopedApplication(req, res, next) {
+  const application = db.getApplicationByIdForSession(req.params.id, req.demoSession);
+  if (!application) {
+    return apiError(res, 404, 'APPLICATION_NOT_FOUND', 'Application not found');
+  }
+  req.application = application;
+  return next();
+}
+
 // Read-only API-backed slice: scope comes from the synthetic demo session.
 router.get('/', requireDemoSession, (req, res) => {
   const { status } = req.query;
@@ -71,14 +80,14 @@ router.post('/:id/preflight', (req, res) => {
 });
 
 // GET /api/applications/:id/findings?severity=&outcome=&ruleKey=
-router.get('/:id/findings', (req, res) => {
+router.get('/:id/findings', requireDemoSession, requireScopedApplication, (req, res) => {
   const result = db.getFindings(req.params.id, req.query);
   if (!result) return apiError(res, 404, 'APPLICATION_NOT_FOUND', 'Application not found');
   res.json({ success: true, data: result });
 });
 
 // GET /api/applications/:id/versions - every submitted version of the extracted data
-router.get('/:id/versions', (req, res) => {
+router.get('/:id/versions', requireDemoSession, requireScopedApplication, (req, res) => {
   const versions = db.getFieldVersions(req.params.id);
   if (!versions) return apiError(res, 404, 'APPLICATION_NOT_FOUND', 'Application not found');
   res.json({
