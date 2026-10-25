@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
-  INITIAL_APPLICATIONS, 
   INITIAL_UNDERTAKINGS, 
   INITIAL_LEASE_DOCUMENTS, 
   INITIAL_NOTIFICATIONS, 
@@ -9,7 +8,7 @@ import {
 } from './data/mockData';
 import { api } from './services/api';
 
-import { Role, DEMO_PROFILES, usePermissions, RequireRole } from './lib/permissions';
+import { Role, usePermissions, RequireRole } from './lib/permissions';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { RoleLoginModal } from './components/RoleLoginModal';
@@ -32,42 +31,124 @@ import { ShieldAlert, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   // Master State
-  const [applications, setApplications] = useState(INITIAL_APPLICATIONS);
+  const [applications, setApplications] = useState([]);
   const [undertakings, setUndertakings] = useState(INITIAL_UNDERTAKINGS);
   const [leaseDocs, setLeaseDocs] = useState(INITIAL_LEASE_DOCUMENTS);
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [aphRules, setAphRules] = useState(INITIAL_APH_RULES);
   
   // RBAC State: 3 Roles (Default to Regional Officer for rich demo, or Bureau Head)
-  const [currentUser, setCurrentUser] = useState(DEMO_PROFILES[Role.REGIONAL_OFFICER]);
+  const [currentUser, setCurrentUser] = useState({
+    role: Role.REGIONAL_OFFICER,
+    officer: 'Synthetic Regional Officer (WRO)',
+    designation: 'Synthetic Demo Regional Officer, WRO',
+    badge: 'Regional Officer (WRO, Synthetic Demo)',
+    region: 'WRO',
+    isSynthetic: true
+  });
   const [isRoleSelectorOpen, setIsRoleSelectorOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [simDaysOffset, setSimDaysOffset] = useState(0);
 
   // Modals
-  const [inspectingApp, setInspectingApp] = useState(null);
+  const [inspectingAppId, setInspectingAppId] = useState(null);
+  const [applicationDetail, setApplicationDetail] = useState(null);
+  const [applicationDetailLoading, setApplicationDetailLoading] = useState(false);
+  const [applicationDetailError, setApplicationDetailError] = useState(null);
+  const applicationDetailRequestRef = useRef(0);
   const [summaryApp, setSummaryApp] = useState(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [lastActionMessage, setLastActionMessage] = useState('');
   const [apiOnline, setApiOnline] = useState(false);
+  const [applicationsLoading, setApplicationsLoading] = useState(true);
+  const [applicationsError, setApplicationsError] = useState('');
 
-  // Check Backend REST API connectivity
+  const loadApplicationReads = useCallback(async () => {
+    setApplicationsLoading(true);
+    setApplicationsError('');
+    try {
+      const data = await api.getApplications();
+      setApplications(data || []);
+    } catch (error) {
+      setApplications([]);
+      setApplicationsError(error.message || 'Unable to load applications from the backend.');
+    } finally {
+      setApplicationsLoading(false);
+    }
+  }, []);
+
+  const clearApplicationDetail = useCallback(() => {
+    applicationDetailRequestRef.current += 1;
+    setInspectingAppId(null);
+    setApplicationDetail(null);
+    setApplicationDetailLoading(false);
+    setApplicationDetailError(null);
+  }, []);
+
+  const handleSelectApplication = useCallback(async (applicationOrId) => {
+    const applicationId = typeof applicationOrId === 'string' ? applicationOrId : applicationOrId?.id;
+    if (!applicationId) return;
+
+    const requestId = ++applicationDetailRequestRef.current;
+    setInspectingAppId(applicationId);
+    setApplicationDetail(null);
+    setApplicationDetailError(null);
+    setApplicationDetailLoading(true);
+
+    try {
+      const detail = await api.getApplication(applicationId);
+      if (requestId !== applicationDetailRequestRef.current) return;
+      setApplicationDetail(detail);
+    } catch (error) {
+      if (requestId !== applicationDetailRequestRef.current) return;
+      setApplicationDetailError(error);
+    } finally {
+      if (requestId === applicationDetailRequestRef.current) {
+        setApplicationDetailLoading(false);
+      }
+    }
+  }, []);
+
+  // Establish the synthetic demo session, then load server-scoped application reads.
   useEffect(() => {
     let isMounted = true;
-    api.checkHealth().then(res => {
-      if (isMounted && res && res.status === 'ONLINE') {
-        setApiOnline(true);
-        console.log('[GovVerify] Connected to Backend REST API at http://localhost:5000');
+
+    const bootstrap = async () => {
+      try {
+        const health = await api.checkHealth();
+        if (isMounted && health?.status === 'ONLINE') setApiOnline(true);
+
+        let session;
+        try {
+          session = await api.getDemoSession();
+        } catch {
+          session = await api.createDemoSession({ role: Role.REGIONAL_OFFICER, region: 'WRO' });
+        }
+        if (isMounted) setCurrentUser(session);
+        await loadApplicationReads();
+      } catch (error) {
+        if (isMounted) {
+          setApiOnline(false);
+          setApplications([]);
+          setApplicationsError(error.message || 'Backend unavailable. Start the demo API and retry.');
+          setApplicationsLoading(false);
+        }
       }
-    });
+    };
+
+    bootstrap();
     return () => { isMounted = false; };
-  }, []);
+  }, [loadApplicationReads]);
+
+  // A new server session must never retain detail from the previous scope.
+  useEffect(() => {
+    clearApplicationDetail();
+  }, [currentUser.role, currentUser.region, currentUser.institutionId, clearApplicationDetail]);
 
   // Hook for strict RBAC and data scoping
   const { 
     can, 
     isRole, 
-    scopeApplications, 
     scopeUndertakings, 
     scopeDocuments, 
     scopeNotifications, 
@@ -75,7 +156,8 @@ export default function App() {
   } = usePermissions(currentUser);
 
   // Scoped Data Collections
-  const visibleApplications = scopeApplications(applications);
+  // Application reads are already scoped by the backend session.
+  const visibleApplications = applications;
   const visibleUndertakings = scopeUndertakings(undertakings);
   const visibleLeaseDocs = scopeDocuments(leaseDocs);
   const visibleNotifications = scopeNotifications(notifications);
@@ -97,11 +179,19 @@ export default function App() {
   };
 
   // Role Switching Handler
-  const handleSelectRole = (newProfile) => {
-    setCurrentUser(newProfile);
-    setIsRoleSelectorOpen(false);
-    setActiveTab('dashboard');
-    triggerToast(`Logged in as ${newProfile.badge} (${newProfile.region || newProfile.institutionId})`);
+  const handleSelectRole = async (newProfile) => {
+    clearApplicationDetail();
+    try {
+      const session = await api.createDemoSession({ role: newProfile.role, region: newProfile.region });
+      setCurrentUser(session);
+      setIsRoleSelectorOpen(false);
+      setActiveTab('dashboard');
+      await loadApplicationReads();
+      triggerToast(`Synthetic demo session active: ${session.badge}`);
+    } catch (error) {
+      setApplicationsError(error.message || 'Unable to switch synthetic demo session.');
+      triggerToast('Demo session could not be created.');
+    }
   };
 
   // ==========================================
@@ -273,7 +363,7 @@ export default function App() {
 
   const handleResetTime = () => {
     setSimDaysOffset(0);
-    setApplications(INITIAL_APPLICATIONS);
+    loadApplicationReads();
     setUndertakings(INITIAL_UNDERTAKINGS);
     setLeaseDocs(INITIAL_LEASE_DOCUMENTS);
     setNotifications(INITIAL_NOTIFICATIONS);
@@ -656,8 +746,7 @@ export default function App() {
   };
 
   const handleSelectApplicationById = (appId) => {
-    const found = applications.find(a => a.id === appId);
-    if (found) setInspectingApp(found);
+    handleSelectApplication(appId);
   };
 
   // Counts for Sidebar Badges
@@ -694,6 +783,18 @@ export default function App() {
         lastActionMessage={lastActionMessage}
       />
 
+      <div style={{
+        margin: '0 24px 12px 264px',
+        padding: '8px 12px',
+        border: '1px solid #bfdbfe',
+        background: '#eff6ff',
+        color: '#1e40af',
+        borderRadius: '2px',
+        fontSize: '0.74rem'
+      }}>
+        <strong>SYNTHETIC DEMO MODE:</strong> application reads are server-scoped. Workflow mutations and non-application tabs remain local prototype behavior in this slice.
+      </div>
+
       {/* Main Two-Column Layout: Left Sidebar + Role-Specific Content Area */}
       <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 120px)' }}>
         
@@ -708,6 +809,26 @@ export default function App() {
 
         {/* Dynamic Main Workspace depending on Role and Active Tab */}
         <main className="main-content" style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
+
+          {applicationsLoading && (
+            <div className="empty-state-box" style={{ marginBottom: '18px' }}>
+              Loading synthetic applications from the backend…
+            </div>
+          )}
+          {applicationsError && (
+            <div className="empty-state-box" style={{ marginBottom: '18px', borderColor: '#fecaca', color: '#991b1b' }}>
+              <strong>Application reads unavailable.</strong>
+              <div style={{ marginTop: '6px' }}>{applicationsError}</div>
+              <button className="btn-dark" style={{ marginTop: '12px' }} onClick={loadApplicationReads}>
+                Retry application read
+              </button>
+            </div>
+          )}
+          {!applicationsLoading && !applicationsError && applications.length === 0 && (
+            <div className="empty-state-box" style={{ marginBottom: '18px' }}>
+              No synthetic applications are available for this demo session.
+            </div>
+          )}
           
           {/* Dashboard Tab */}
           {activeTab === 'dashboard' && (
@@ -721,7 +842,7 @@ export default function App() {
                 onOpenCaseSummary={(app) => setSummaryApp(app)}
                 onOpenUploadUndertaking={() => setActiveTab('undertakings')}
                 onOpenUploadLease={() => setActiveTab('documents')}
-                onSelectApplication={(app) => setInspectingApp(app)}
+                onSelectApplication={handleSelectApplication}
                 onProgressStage={handleProgressStage}
                 currentUser={currentUser}
               />
@@ -730,7 +851,7 @@ export default function App() {
                 applications={visibleApplications}
                 undertakings={visibleUndertakings}
                 leaseDocs={visibleLeaseDocs}
-                onSelectApplication={(app) => setInspectingApp(app)}
+                onSelectApplication={handleSelectApplication}
                 onProgressStage={handleProgressStage}
                 onOpenCaseSummary={(app) => setSummaryApp(app)}
                 onNavigateTab={(tab) => setActiveTab(tab)}
@@ -743,7 +864,7 @@ export default function App() {
           {activeTab === 'applications' && (
             <WorkflowAutomation
               applications={visibleApplications}
-              onSelectApplication={(app) => setInspectingApp(app)}
+              onSelectApplication={handleSelectApplication}
               onProgressStage={handleProgressStage}
               onRevertWithDeficiency={handleRevertWithDeficiency}
               onOpenCaseSummary={(app) => setSummaryApp(app)}
@@ -760,7 +881,7 @@ export default function App() {
                 applications={visibleApplications}
                 onScheduleEvc={handleScheduleEvc}
                 onSubmitEvcReport={handleSubmitEvcReport}
-                onOpenApplicationDossier={(app) => setInspectingApp(app)}
+                onOpenApplicationDossier={handleSelectApplication}
                 currentRole={currentUser}
               />
             </RequireRole>
@@ -879,13 +1000,21 @@ export default function App() {
       />
 
       {/* Application Full Dossier Modal */}
-      {inspectingApp && (
+      {inspectingAppId && (
         <ApplicationDetailsModal
-          application={inspectingApp}
-          onClose={() => setInspectingApp(null)}
+          applicationId={inspectingAppId}
+          application={applicationDetail}
+          isLoading={applicationDetailLoading}
+          error={applicationDetailError}
+          onRetry={() => handleSelectApplication(inspectingAppId)}
+          onSessionExpired={() => {
+            clearApplicationDetail();
+            setIsRoleSelectorOpen(true);
+          }}
+          onClose={clearApplicationDetail}
           onProgressStage={handleProgressStage}
           onOpenCaseSummary={(app) => {
-            setInspectingApp(null);
+            clearApplicationDetail();
             setSummaryApp(app);
           }}
         />

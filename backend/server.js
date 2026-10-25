@@ -19,7 +19,8 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: '*', // Allow frontend development requests
+  origin: true, // Local demo frontend only; do not use as production CORS policy.
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

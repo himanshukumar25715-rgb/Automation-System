@@ -1,21 +1,81 @@
-// In-Memory Data Store & Business Mutators for AICTE PRAGATI-NAV Backend
+// SQLite-backed demo store & business mutators for AICTE PRAGATI-NAV Backend
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { DatabaseSync } from 'node:sqlite';
 import { initialApplications, initialExperts, initialIntegrations } from './initialData.js';
 import { AICTE_REGIONS, APH_SLA_RULES, WORKFLOW_ROUTES } from '../config/constants.js';
 
 class DataStore {
   constructor() {
-    this.applications = JSON.parse(JSON.stringify(initialApplications));
-    this.experts = JSON.parse(JSON.stringify(initialExperts));
-    this.integrations = JSON.parse(JSON.stringify(initialIntegrations));
+    const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+    this.dbPath = process.env.GOVVERIFY_DB_PATH || path.resolve(moduleDir, '../../data/govverify.sqlite');
+    fs.mkdirSync(path.dirname(this.dbPath), { recursive: true });
+    this.sqlite = new DatabaseSync(this.dbPath);
+    this.sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS applications (
+        id TEXT PRIMARY KEY,
+        institute_id TEXT NOT NULL,
+        region TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        is_synthetic INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    const seedApplication = this.sqlite.prepare(`
+      INSERT OR IGNORE INTO applications (id, institute_id, region, payload, is_synthetic)
+      VALUES (?, ?, ?, ?, 1)
+    `);
+    for (const source of initialApplications) {
+      const application = { ...JSON.parse(JSON.stringify(source)), isSynthetic: true };
+      seedApplication.run(
+        application.id,
+        application.instituteId,
+        application.region,
+        JSON.stringify(application)
+      );
+    }
+
+    this.applications = this._readApplications();
+    this.experts = initialExperts.map(expert => ({ ...expert, isSynthetic: true }));
+    this.integrations = initialIntegrations.map(integration => ({ ...integration, isSynthetic: true }));
     this.regions = JSON.parse(JSON.stringify(AICTE_REGIONS));
     this.slaRules = { ...APH_SLA_RULES };
     this.workflowRoutes = { ...WORKFLOW_ROUTES };
     this.auditLogs = [];
   }
 
+  _readApplications() {
+    return this.sqlite
+      .prepare('SELECT payload FROM applications ORDER BY id')
+      .all()
+      .map(row => ({ ...JSON.parse(row.payload), isSynthetic: true }));
+  }
+
+  _refreshApplications() {
+    this.applications = this._readApplications();
+    return this.applications;
+  }
+
+  _persistApplication(application) {
+    const payload = { ...application, isSynthetic: true };
+    this.sqlite.prepare(`
+      INSERT INTO applications (id, institute_id, region, payload, is_synthetic, updated_at)
+      VALUES (?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
+      ON CONFLICT(id) DO UPDATE SET
+        institute_id = excluded.institute_id,
+        region = excluded.region,
+        payload = excluded.payload,
+        is_synthetic = 1,
+        updated_at = CURRENT_TIMESTAMP
+    `).run(payload.id, payload.instituteId, payload.region, JSON.stringify(payload));
+  }
+
   // Applications
   getApplications({ region, status, institutionId } = {}) {
-    let list = this.applications;
+    let list = this._refreshApplications();
     if (region) {
       list = list.filter(app => app.region.toUpperCase() === region.toUpperCase());
     }
@@ -29,7 +89,24 @@ class DataStore {
   }
 
   getApplicationById(id) {
-    return this.applications.find(a => a.id === id) || null;
+    return this._refreshApplications().find(a => a.id === id) || null;
+  }
+
+  getApplicationsForSession(session, { status } = {}) {
+    let list = this._refreshApplications();
+    if (session.role === 'INSTITUTION') {
+      list = list.filter(app => app.instituteId === session.institutionId);
+    } else if (session.role === 'REGIONAL_OFFICER') {
+      list = list.filter(app => app.region === session.region);
+    }
+    if (status) {
+      list = list.filter(app => app.status.toLowerCase() === status.toLowerCase());
+    }
+    return list;
+  }
+
+  getApplicationByIdForSession(id, session) {
+    return this.getApplicationsForSession(session).find(app => app.id === id) || null;
   }
 
   advanceApplicationStage(id, { remarks, actor = 'Regional Officer' } = {}) {

@@ -23,6 +23,21 @@ Server runs at `http://localhost:5000` with automated reload on file changes.
 npm start
 ```
 
+The local demo uses Node 22's built-in SQLite support. By default it creates
+`backend/data/govverify.sqlite`; override the location with `GOVVERIFY_DB_PATH`.
+Seed application records are inserted idempotently and are marked as synthetic
+demo data. The application read endpoints require a synthetic demo session.
+
+Focused read-slice check:
+
+```bash
+npm run check:application-reads
+```
+
+This verifies institution, regional officer, and bureau-head read scopes,
+query-parameter isolation, and availability after a backend restart. The demo
+session is not production authentication.
+
 ---
 
 ## 📡 REST API Reference
@@ -35,8 +50,8 @@ npm start
 ### Module A: Applications & Approval Workflow
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/applications` | Query applications by `region`, `status`, or `institutionId`. |
-| `GET` | `/api/applications/:id` | Get application dossier by ID. |
+| `GET` | `/api/applications` | Read applications within the active synthetic demo session scope. |
+| `GET` | `/api/applications/:id` | Get an in-scope application dossier by ID. |
 | `POST` | `/api/applications/:id/advance` | Advance application to next prescribed APH stage. |
 | `POST` | `/api/applications/:id/revert` | Return application with deficiency clause and start 7-day cure clock. |
 | `POST` | `/api/applications/:id/deficiency/:defId/remedy` | Submit institution remedy response evidence. |
@@ -71,6 +86,9 @@ npm start
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/auth/roles` | RBAC role definitions (Institution, Regional Officer, Bureau Head). |
+| `POST` | `/api/auth/demo-session` | Start an explicitly labelled synthetic demo session. |
+| `GET` | `/api/auth/demo-session` | Read the active synthetic demo session. |
+| `DELETE` | `/api/auth/demo-session` | Clear the synthetic demo session. |
 | `GET` | `/api/integrations` | Real-time connectivity status of DigiLocker, Land Records, e-Sign & SMS. |
 | `POST` | `/api/integrations/:id/sync` | Trigger verification sync with national e-Gov APIs. |
 | `GET` | `/api/reports/summary` | High-level national approval metrics and statutory compliance rate. |

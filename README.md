@@ -88,6 +88,27 @@ npm run dev
 ```
 Open `http://localhost:5173` in your browser.
 
+### Synthetic demo mode and current implementation boundary
+
+The current vertical slice uses a server-created synthetic demo session and
+SQLite-backed application reads. Institution, regional officer, and bureau-head
+read scopes are enforced by the backend session, not by client query
+parameters. The SQLite database is created at `backend/data/govverify.sqlite`
+and can be overridden with `GOVVERIFY_DB_PATH`.
+
+All seeded application records are labelled synthetic demo data. This slice is
+not production authentication and does not use real institution records or
+personal identifiers. Application workflow mutations, document uploads,
+extraction, EVC checks, alerts, audit verification, QR/public status, and the
+other tabs remain local prototype behavior until later implementation slices.
+
+Run the focused backend checks with:
+
+```bash
+cd backend
+npm run check:application-reads
+```
+
 ### 3. Generate Official PDF Report
 ```bash
 # Run the standalone PDF generator script

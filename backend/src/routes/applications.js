@@ -1,22 +1,24 @@
 import express from 'express';
 import { db } from '../data/store.js';
+import { requireDemoSession } from '../middleware/demoSession.js';
 
 const router = express.Router();
 
-// GET /api/applications - Query by region, status, institutionId
-router.get('/', (req, res) => {
-  const { region, status, institutionId } = req.query;
-  const applications = db.getApplications({ region, status, institutionId });
+// Read-only API-backed slice: scope comes from the synthetic demo session.
+router.get('/', requireDemoSession, (req, res) => {
+  const { status } = req.query;
+  const applications = db.getApplicationsForSession(req.demoSession, { status });
   res.json({
     success: true,
+    demoMode: true,
     count: applications.length,
     data: applications
   });
 });
 
 // GET /api/applications/:id - Fetch single application
-router.get('/:id', (req, res) => {
-  const app = db.getApplicationById(req.params.id);
+router.get('/:id', requireDemoSession, (req, res) => {
+  const app = db.getApplicationByIdForSession(req.params.id, req.demoSession);
   if (!app) {
     return res.status(404).json({ success: false, message: 'Application not found' });
   }
